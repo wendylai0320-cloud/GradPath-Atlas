@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { useWorkspace, useRefresh, readiness, nextDeadline, formatDate, money, label, STATUSES, toCsv, downloadFile, daysUntil } from "@/lib/atlas";
 import { AddProgramme } from "@/components/AddProgramme";
 import { Badge, Button, Empty, Input, PageHeader, Progress, Select } from "@/components/ui-kit";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/compare")({
   head: () => ({ meta: [{ title: "Compare programmes — GradPath Atlas" }, { name: "description", content: "Side-by-side programme requirements." }] }),
@@ -54,6 +56,14 @@ function Compare() {
   if (isLoading || !ws) return <p className="text-muted-foreground">Loading…</p>;
   const countries = Array.from(new Set(ws.applications.map((a) => ws.programmes.find((p) => p.id === a.programme_id)?.universities?.country).filter(Boolean))) as string[];
 
+  async function removeProgramme(appId: string, name: string) {
+    if (!window.confirm(`Remove "${name}" from your plan? This also deletes its notes and document links.`)) return;
+    const { error } = await supabase.from("applications").delete().eq("id", appId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Removed ${name}`);
+    refresh();
+  }
+
   function exportCsv() {
     downloadFile("gradpath-comparison.csv", toCsv([
       ["Programme", "Degree", "University", "Country", "Tuition", "Currency", "Duration (months)", "Intake", "Min GPA", "English", "References", "Portfolio", "Interview", "Next deadline", "Status", "Priority", "Shortlisted", "Readiness %"],
@@ -102,6 +112,7 @@ function Compare() {
                 <Th>Status</Th>
                 <Th k="priority">Priority</Th>
                 <Th k="readiness" className="w-44">Readiness</Th>
+                <Th><span className="sr-only">Actions</span></Th>
               </tr>
             </thead>
             <tbody>
@@ -122,6 +133,13 @@ function Compare() {
                   <td className="px-4 py-3">{label(STATUSES, a.status)}</td>
                   <td className="px-4 py-3">{["", "High", "Medium", "Low"][a.priority]}</td>
                   <td className="px-4 py-3"><Progress value={r.pct} label={`${p.name} readiness`} /><p className="mt-1 text-xs text-muted-foreground">{r.ready}/{r.total} items ready</p></td>
+                  <td className="px-4 py-3">
+                    <button type="button" onClick={() => removeProgramme(a.id, `${p.degree} ${p.name}`)}
+                      aria-label={`Remove ${p.name}`} title="Remove from plan"
+                      className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
