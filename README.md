@@ -1,6 +1,6 @@
-# Your Project Helper
+# GradPath Atlas
 
-can you help me create repository
+A desktop-first workspace for planning master's applications. See [PRD.md](PRD.md) and [TASK_LIST.md](TASK_LIST.md).
 
 This project was built with [Lovable](https://lovable.dev).
 

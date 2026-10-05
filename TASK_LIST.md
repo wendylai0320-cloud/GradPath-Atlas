@@ -26,7 +26,7 @@
 - [x] Auto-fill fields from pre-loaded mock programme records (HK, UK, US, SG)
 - [x] Manual override of any auto-filled field / fully custom entry
 - [x] PRD.md and TASK_LIST.md
-- [ ] Rename README title to GradPath Atlas
+- [x] Rename README title to GradPath Atlas
 - [ ] Invite instructor as GitHub collaborator (if repo is private)
 
 ## Backlog
