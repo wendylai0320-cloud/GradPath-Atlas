@@ -77,6 +77,7 @@ export type Database = {
           programme_id: string
           shortlisted: boolean
           status: string
+          tier: string
           updated_at: string
           user_id: string
         }
@@ -88,6 +89,7 @@ export type Database = {
           programme_id: string
           shortlisted?: boolean
           status?: string
+          tier?: string
           updated_at?: string
           user_id: string
         }
@@ -99,6 +101,7 @@ export type Database = {
           programme_id?: string
           shortlisted?: boolean
           status?: string
+          tier?: string
           updated_at?: string
           user_id?: string
         }
@@ -215,24 +218,36 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          currency: string
           display_name: string | null
+          gpa: string
+          gpa_scale: string
           id: string
           plan: string
           role: string
+          target_intake: string
         }
         Insert: {
           created_at?: string
+          currency?: string
           display_name?: string | null
+          gpa?: string
+          gpa_scale?: string
           id: string
           plan?: string
           role?: string
+          target_intake?: string
         }
         Update: {
           created_at?: string
+          currency?: string
           display_name?: string | null
+          gpa?: string
+          gpa_scale?: string
           id?: string
           plan?: string
           role?: string
+          target_intake?: string
         }
         Relationships: []
       }
