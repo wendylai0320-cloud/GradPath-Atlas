@@ -5,6 +5,7 @@ import { type Workspace, money } from "@/lib/atlas";
 import { planOf } from "@/lib/plans";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { searchPresets, type Preset } from "@/lib/programme-presets";
 
 export function useProfile() {
   return useQuery({
@@ -27,6 +28,16 @@ export function AddProgramme({ ws, onDone }: { ws: Workspace; onDone: () => void
   const tracked = new Set(ws.applications.map((a) => a.programme_id));
   const available = ws.programmes.filter((p) => !tracked.has(p.id));
   const [f, setF] = useState({ university: "", country: "", name: "", degree: "MSc", tuition: "", currency: "GBP", english: "", deadline: "" });
+  const [q, setQ] = useState("");
+  const [filled, setFilled] = useState("");
+  const [intake, setIntake] = useState("");
+  const results = searchPresets(q);
+  function applyPreset(p: Preset) {
+    setF({ university: p.university, country: p.country, name: p.name, degree: p.degree, tuition: String(p.tuition), currency: p.currency, english: p.english, deadline: p.deadline });
+    setFilled(`${p.acronym} ${p.degree} ${p.name}`);
+    setIntake(p.intake);
+    setQ("");
+  }
 
   async function track(programmeId: string) {
     setErr("");
@@ -88,6 +99,27 @@ export function AddProgramme({ ws, onDone }: { ws: Workspace; onDone: () => void
                 ))}
               </ul>
             ) : (
+              <>
+              <div className="relative mt-4">
+                <label htmlFor="psearch" className="text-sm font-medium">Search programmes to auto-fill</label>
+                <Input id="psearch" autoComplete="off" placeholder='e.g. "CUHK Business Analytics", "HKU Finance", "LSE Data Science"'
+                  value={q} onChange={(e) => setQ(e.target.value)} className="mt-1" />
+                {q && (
+                  <ul role="listbox" className="absolute z-10 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-border bg-card shadow-lg">
+                    {results.length === 0 && <li className="p-3 text-sm text-muted-foreground">No match — fill in the form below manually.</li>}
+                    {results.map((p) => (
+                      <li key={p.acronym + p.name}>
+                        <button type="button" role="option" aria-selected={false} onClick={() => applyPreset(p)}
+                          className="w-full px-3 py-2 text-left hover:bg-secondary">
+                          <span className="font-medium">{p.acronym} · {p.degree} {p.name}</span>
+                          <span className="block text-xs text-muted-foreground">{p.university} · {money(p.tuition, p.currency)} · {p.intake} · deadline {p.deadline}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              {filled && <p className="mt-3 rounded-md bg-secondary p-2 text-sm">Auto-filled from {filled} ({intake}) — you can edit any field below.</p>}
               <form onSubmit={createCustom} className="mt-4 grid grid-cols-2 gap-4">
                 <Field label="University" htmlFor="u"><Input id="u" required value={f.university} onChange={(e) => setF({ ...f, university: e.target.value })} /></Field>
                 <Field label="Country" htmlFor="c"><Input id="c" value={f.country} onChange={(e) => setF({ ...f, country: e.target.value })} /></Field>
@@ -99,6 +131,7 @@ export function AddProgramme({ ws, onDone }: { ws: Workspace; onDone: () => void
                 <Field label="Application deadline" htmlFor="dl"><Input id="dl" type="date" value={f.deadline} onChange={(e) => setF({ ...f, deadline: e.target.value })} /></Field>
                 <div className="col-span-2 flex justify-end"><Button type="submit">Save and track</Button></div>
               </form>
+              </>
             )}
           </>
         )}
