@@ -13,7 +13,7 @@ export type Requirement = { id: string; programme_id: string; label: string; det
 export type Deadline = { id: string; programme_id: string | null; label: string; due_date: string; owner_id: string | null };
 export type Application = {
   id: string; user_id: string; programme_id: string; status: string; priority: number;
-  shortlisted: boolean; adviser_comment: string; updated_at: string;
+  shortlisted: boolean; adviser_comment: string; updated_at: string; tier?: string;
 };
 export type Doc = { id: string; user_id: string; title: string; doc_type: string; status: string; link: string; notes: string };
 export type AppDoc = { application_id: string; document_id: string; user_id: string };
@@ -144,3 +144,9 @@ export function downloadFile(name: string, content: string, type = "text/csv") {
 export function toCsv(rows: (string | number)[][]) {
   return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
 }
+
+export const TIERS = [
+  { value: "reach", label: "Reach" },
+  { value: "target", label: "Target" },
+  { value: "safety", label: "Safety" },
+] as const;
