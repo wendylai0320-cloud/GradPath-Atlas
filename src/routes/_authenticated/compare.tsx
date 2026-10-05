@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { useWorkspace, useRefresh, readiness, nextDeadline, formatDate, money, label, STATUSES, toCsv, downloadFile, daysUntil } from "@/lib/atlas";
 import { AddProgramme } from "@/components/AddProgramme";
 import { Badge, Button, Empty, Input, PageHeader, Progress, Select } from "@/components/ui-kit";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/compare")({
   head: () => ({ meta: [{ title: "Compare programmes — GradPath Atlas" }, { name: "description", content: "Side-by-side programme requirements." }] }),
