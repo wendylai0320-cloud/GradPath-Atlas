@@ -112,6 +112,7 @@ function Compare() {
                 <Th>Status</Th>
                 <Th k="priority">Priority</Th>
                 <Th k="readiness" className="w-44">Readiness</Th>
+                <Th><span className="sr-only">Actions</span></Th>
               </tr>
             </thead>
             <tbody>
