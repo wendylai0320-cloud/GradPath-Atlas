@@ -56,6 +56,14 @@ function Compare() {
   if (isLoading || !ws) return <p className="text-muted-foreground">Loading…</p>;
   const countries = Array.from(new Set(ws.applications.map((a) => ws.programmes.find((p) => p.id === a.programme_id)?.universities?.country).filter(Boolean))) as string[];
 
+  async function removeProgramme(appId: string, name: string) {
+    if (!window.confirm(`Remove "${name}" from your plan? This also deletes its notes and document links.`)) return;
+    const { error } = await supabase.from("applications").delete().eq("id", appId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Removed ${name}`);
+    refresh();
+  }
+
   function exportCsv() {
     downloadFile("gradpath-comparison.csv", toCsv([
       ["Programme", "Degree", "University", "Country", "Tuition", "Currency", "Duration (months)", "Intake", "Min GPA", "English", "References", "Portfolio", "Interview", "Next deadline", "Status", "Priority", "Shortlisted", "Readiness %"],
