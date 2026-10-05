@@ -37,7 +37,7 @@ function ProgrammeDetail() {
   const deadlines = ws.deadlines.filter((d) => d.programme_id === prog.id);
   const linkedIds = new Set(ws.links.filter((l) => l.application_id === app.id).map((l) => l.document_id));
 
-  async function update(patch: Record<string, unknown>) {
+  async function update(patch: { status?: string; tier?: string; priority?: number; shortlisted?: boolean; adviser_comment?: string }) {
     setErr("");
     const { error } = await supabase.from("applications").update(patch).eq("id", app!.id);
     if (error) setErr(error.message);
