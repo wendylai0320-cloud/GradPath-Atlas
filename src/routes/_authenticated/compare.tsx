@@ -133,6 +133,13 @@ function Compare() {
                   <td className="px-4 py-3">{label(STATUSES, a.status)}</td>
                   <td className="px-4 py-3">{["", "High", "Medium", "Low"][a.priority]}</td>
                   <td className="px-4 py-3"><Progress value={r.pct} label={`${p.name} readiness`} /><p className="mt-1 text-xs text-muted-foreground">{r.ready}/{r.total} items ready</p></td>
+                  <td className="px-4 py-3">
+                    <button type="button" onClick={() => removeProgramme(a.id, `${p.degree} ${p.name}`)}
+                      aria-label={`Remove ${p.name}`} title="Remove from plan"
+                      className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
