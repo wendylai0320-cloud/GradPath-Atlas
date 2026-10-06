@@ -31,7 +31,7 @@ function Documents() {
     if (!f.title.trim()) return setErr("Please give the document a title.");
     if (file && file.size > 20 * 1024 * 1024) return setErr("That file is larger than 20 MB.");
     setBusy(true);
-    const payload: Record<string, string> = { ...f };
+    const payload: typeof f & { file_path?: string; file_name?: string } = { ...f };
     if (file) {
       const path = `${ws!.userId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
       const up = await supabase.storage.from("documents").upload(path, file);
