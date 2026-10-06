@@ -163,7 +163,7 @@ function Compare() {
                   <td className="px-4 py-3">{p.universities?.name}<p className="text-xs text-muted-foreground">{p.universities?.country}</p></td>
                   <td className="px-4 py-3 tabular-nums">{showMoney(p.tuition, p.currency)}<p className="text-xs text-muted-foreground">Fee {showMoney(p.application_fee, p.currency)}</p>{cur !== "original" && cur !== p.currency && <p className="text-xs text-muted-foreground">({money(p.tuition, p.currency)})</p>}</td>
                   <td className="px-4 py-3">{p.duration_months} mo<p className="text-xs text-muted-foreground">{p.intake}</p></td>
-                  <td className="px-4 py-3 tabular-nums">{p.min_gpa ?? "—"}{(() => { const g = gpaGap(profile.data?.gpa, p.min_gpa); return g && <p className="mt-1 max-w-[9rem] rounded bg-warning/15 px-1.5 py-0.5 text-xs text-warning-foreground" title="Your GPA is below the listed minimum. Strong experience or test scores may still help.">⚠ Your GPA {g.user} is below {g.min}</p>; })()}</td>
+                  <td className="px-4 py-3 tabular-nums">{p.min_gpa ?? "—"}{(() => { const g = gpaGap(profile.data?.gpa, p.min_gpa); return g && <p className="mt-1 max-w-[9rem] rounded bg-warning/20 px-1.5 py-0.5 text-xs text-foreground" title="Your GPA is below the listed minimum. Strong experience or test scores may still help.">⚠ Your GPA {g.user} is below {g.min}</p>; })()}</td>
                   <td className="px-4 py-3">{p.english_test || "—"}</td>
                   <td className="px-4 py-3 tabular-nums">{p.references_required}</td>
                   <td className="px-4 py-3 space-x-1">{p.portfolio_required && <Badge>Portfolio</Badge>}{p.interview && <Badge>Interview</Badge>}{!p.portfolio_required && !p.interview && "—"}</td>

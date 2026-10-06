@@ -15,7 +15,7 @@ export type Application = {
   id: string; user_id: string; programme_id: string; status: string; priority: number;
   shortlisted: boolean; adviser_comment: string; updated_at: string; tier?: string;
 };
-export type Doc = { id: string; user_id: string; title: string; doc_type: string; status: string; link: string; notes: string };
+export type Doc = { id: string; user_id: string; title: string; doc_type: string; status: string; link: string; notes: string; file_path: string; file_name: string };
 export type AppDoc = { application_id: string; document_id: string; user_id: string };
 export type Task = { id: string; user_id: string; application_id: string | null; title: string; due_date: string | null; done: boolean };
 export type Note = { id: string; application_id: string; body: string; created_at: string; user_id: string };
