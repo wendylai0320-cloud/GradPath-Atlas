@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useWorkspace, useRefresh, label, DOC_TYPES, DOC_STATUSES, type Doc } from "@/lib/atlas";
+import { useWorkspace, useRefresh, label, readiness, DOC_TYPES, DOC_STATUSES, type Doc } from "@/lib/atlas";
 import { Badge, Button, Card, Empty, Field, Input, PageHeader, Select, Textarea } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/_authenticated/documents")({
@@ -18,20 +18,44 @@ function Documents() {
   const [editing, setEditing] = useState<string | null>(null);
   const [err, setErr] = useState("");
   const [filter, setFilter] = useState("all");
+  const [progFilter, setProgFilter] = useState("all");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
 
   if (isLoading || !ws) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  const editingFile = editing ? ws.documents.find((d) => d.id === editing)?.file_name : "";
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setErr("");
     if (!f.title.trim()) return setErr("Please give the document a title.");
+    if (file && file.size > 20 * 1024 * 1024) return setErr("That file is larger than 20 MB.");
+    setBusy(true);
+    const payload: Record<string, string> = { ...f };
+    if (file) {
+      const path = `${ws!.userId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+      const up = await supabase.storage.from("documents").upload(path, file);
+      if (up.error) { setBusy(false); return setErr(up.error.message); }
+      const old = editing ? ws!.documents.find((d) => d.id === editing)?.file_path : "";
+      if (old) await supabase.storage.from("documents").remove([old]);
+      payload.file_path = path;
+      payload.file_name = file.name;
+    }
     const res = editing
-      ? await supabase.from("documents").update(f).eq("id", editing)
-      : await supabase.from("documents").insert({ ...f, user_id: ws!.userId });
+      ? await supabase.from("documents").update(payload).eq("id", editing)
+      : await supabase.from("documents").insert({ ...payload, title: f.title, user_id: ws!.userId });
+    setBusy(false);
     if (res.error) return setErr(res.error.message);
     setF(blank);
+    setFile(null);
+    (document.getElementById("fl") as HTMLInputElement | null)?.value && ((document.getElementById("fl") as HTMLInputElement).value = "");
     setEditing(null);
     refresh();
+  }
+  async function openFile(d: Doc) {
+    const { data, error } = await supabase.storage.from("documents").createSignedUrl(d.file_path, 300);
+    if (error || !data) return alert(error?.message ?? "Could not open file");
+    window.open(data.signedUrl, "_blank", "noopener");
   }
   async function setStatus(d: Doc, status: string) {
     await supabase.from("documents").update({ status }).eq("id", d.id);
@@ -40,6 +64,7 @@ function Documents() {
   async function remove(d: Doc) {
     if (!confirm(`Delete “${d.title}”?`)) return;
     await supabase.from("application_documents").delete().eq("document_id", d.id);
+    if (d.file_path) await supabase.storage.from("documents").remove([d.file_path]);
     await supabase.from("documents").delete().eq("id", d.id);
     refresh();
   }
@@ -50,7 +75,12 @@ function Documents() {
       .map((a) => ws!.programmes.find((p) => p.id === a?.programme_id)?.name)
       .filter(Boolean);
   }
-  const docs = ws.documents.filter((d) => filter === "all" || d.doc_type === filter);
+  const linkedTo = (d: Doc) => ws.links.filter((l) => l.document_id === d.id).map((l) => l.application_id);
+  const docs = ws.documents
+    .filter((d) => filter === "all" || d.doc_type === filter)
+    .filter((d) => progFilter === "all" || (progFilter === "none" ? linkedTo(d).length === 0 : linkedTo(d).includes(progFilter)));
+  const selApp = ws.applications.find((a) => a.id === progFilter);
+  const neededFor = selApp ? readiness(ws, selApp).items : null;
 
   return (
     <>
@@ -66,6 +96,9 @@ function Documents() {
             <Field label="Status" htmlFor="st">
               <Select id="st" value={f.status} onChange={(e) => setF({ ...f, status: e.target.value })}>{DOC_STATUSES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}</Select>
             </Field>
+            <Field label="Attach file from your device (optional)" htmlFor="fl" hint={editingFile ? `Current file: ${editingFile}. Choose a new one to replace it.` : "PDF, Word or image, up to 20 MB."}>
+              <input id="fl" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm file:mr-3 file:rounded-md file:border file:border-input file:bg-secondary file:px-3 file:py-1.5 file:text-sm" />
+            </Field>
             <Field label="Link (optional)" htmlFor="ln" hint="Paste a Google Drive or OneDrive link."><Input id="ln" type="url" value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} /></Field>
             <Field label="Notes" htmlFor="nt"><Textarea id="nt" rows={2} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></Field>
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
@@ -77,20 +110,33 @@ function Documents() {
         </Card>
 
         <div className="space-y-3 lg:col-span-2">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <label htmlFor="flt" className="text-sm text-muted-foreground">Show</label>
             <Select id="flt" className="w-48" value={filter} onChange={(e) => setFilter(e.target.value)}>
               <option value="all">All types</option>
               {DOC_TYPES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
             </Select>
+            <label htmlFor="pflt" className="text-sm text-muted-foreground">for</label>
+            <Select id="pflt" className="w-64" value={progFilter} onChange={(e) => setProgFilter(e.target.value)}>
+              <option value="all">All programmes</option>
+              <option value="none">Not linked to any programme</option>
+              {ws.applications.map((a) => <option key={a.id} value={a.id}>{ws.programmes.find((p) => p.id === a.programme_id)?.name}</option>)}
+            </Select>
           </div>
+          {neededFor && neededFor.length > 0 && (
+            <Card className="p-4">
+              <p className="mb-2 text-sm font-medium">Documents this programme needs</p>
+              <ul className="space-y-1 text-sm">{neededFor.map((it, i) => <li key={i}>{it.ready ? "✓" : "○"} {it.requirement.label} <span className="text-muted-foreground">— {it.doc ? it.doc.title : "no document linked yet"}</span></li>)}</ul>
+            </Card>
+          )}
           {docs.length === 0 ? <Empty>No documents yet. Add your CV, statement, transcripts and references.</Empty> : docs.map((d) => (
             <Card key={d.id} className="p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">{d.title} <span className="text-sm text-muted-foreground">· {label(DOC_TYPES, d.doc_type)}</span></p>
                   {d.notes && <p className="text-sm text-muted-foreground">{d.notes}</p>}
-                  {d.link && <a href={d.link} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Open file</a>}
+                  {d.file_path && <button type="button" onClick={() => openFile(d)} className="mr-3 text-sm text-primary underline">📎 {d.file_name || "Attached file"}</button>}
+                  {d.link && <a href={d.link} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Open link</a>}
                   <p className="mt-1 text-xs text-muted-foreground">Used for: {usedBy(d).join(", ") || "not linked yet — link it from a programme page"}</p>
                 </div>
                 <div className="flex items-center gap-2">

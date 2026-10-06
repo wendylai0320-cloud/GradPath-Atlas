@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useWorkspace, useRefresh, readiness, nextDeadline, formatDate, money, label, STATUSES, toCsv, downloadFile, daysUntil } from "@/lib/atlas";
-import { AddProgramme } from "@/components/AddProgramme";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useWorkspace, useRefresh, readiness, nextDeadline, formatDate, money, label, STATUSES, toCsv, downloadFile, daysUntil, convert, gpaGap, DISPLAY_CURRENCIES } from "@/lib/atlas";
+import { AddProgramme, useProfile } from "@/components/AddProgramme";
 import { Badge, Button, Empty, Input, PageHeader, Progress, Select } from "@/components/ui-kit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -13,9 +14,37 @@ export const Route = createFileRoute("/_authenticated/compare")({
 
 type SortKey = "name" | "university" | "tuition" | "deadline" | "readiness" | "priority";
 
+function NotesCell({ appId, notes, onSaved }: { appId: string; notes: { id: string; body: string; application_id: string }[]; onSaved: () => void }) {
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function add() {
+    if (!text.trim()) return;
+    setBusy(true);
+    const { data: u } = await supabase.auth.getUser();
+    const { error } = await supabase.from("notes").insert({ application_id: appId, body: text.trim(), user_id: u.user!.id });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setText("");
+    onSaved();
+  }
+  return (
+    <div className="space-y-1.5">
+      {notes.slice(-3).map((n) => <p key={n.id} className="rounded bg-muted px-2 py-1 text-xs">{n.body}</p>)}
+      <div className="flex gap-1">
+        <Input aria-label="Add note" placeholder="Add a note…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} className="h-8 text-xs" />
+        <Button size="sm" variant="outline" onClick={add} disabled={busy || !text.trim()}>Add</Button>
+      </div>
+    </div>
+  );
+}
+
 function Compare() {
   const { data: ws, isLoading } = useWorkspace();
   const refresh = useRefresh();
+  const profile = useProfile();
+  const notes = useQuery({ queryKey: ["notes-all"], queryFn: async () => (await supabase.from("notes").select("id, body, application_id").order("created_at")).data ?? [] });
+  const [cur, setCur] = useState("original");
+  useEffect(() => { const c = (profile.data as { currency?: string } | undefined)?.currency; if (c) setCur(c); }, [profile.data]);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
   const [country, setCountry] = useState("all");
@@ -64,7 +93,14 @@ function Compare() {
     refresh();
   }
 
+  function showMoney(n: number, c: string) {
+    if (cur === "original" || cur === c) return money(n, c);
+    const v = convert(n, c, cur);
+    return v == null ? money(n, c) : `≈ ${money(v, cur)}`;
+  }
+
   function exportCsv() {
+    toast.success("CSV downloaded");
     downloadFile("gradpath-comparison.csv", toCsv([
       ["Programme", "Degree", "University", "Country", "Tuition", "Currency", "Duration (months)", "Intake", "Min GPA", "English", "References", "Portfolio", "Interview", "Next deadline", "Status", "Priority", "Shortlisted", "Readiness %"],
       ...rows.map(({ a, p, r, d }) => [p.name, p.degree, p.universities?.name ?? "", p.universities?.country ?? "", p.tuition, p.currency, p.duration_months, p.intake, p.min_gpa ?? "", p.english_test, p.references_required, p.portfolio_required ? "Yes" : "No", p.interview ? "Yes" : "No", d?.due_date ?? "", label(STATUSES, a.status), a.priority, a.shortlisted ? "Yes" : "No", r.pct]),
@@ -92,6 +128,7 @@ function Compare() {
         <div><label htmlFor="st" className="sr-only">Status</label><Select id="st" value={status} onChange={(e) => setStatus(e.target.value)} className="w-44"><option value="all">All statuses</option>{STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</Select></div>
         <div><label htmlFor="co" className="sr-only">Country</label><Select id="co" value={country} onChange={(e) => setCountry(e.target.value)} className="w-44"><option value="all">All countries</option>{countries.map((c) => <option key={c}>{c}</option>)}</Select></div>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={onlyShortlist} onChange={(e) => setOnlyShortlist(e.target.checked)} className="h-4 w-4 accent-primary" />Shortlisted only</label>
+        <div className="flex items-center gap-2"><label htmlFor="cur" className="text-sm text-muted-foreground">Show fees in</label><Select id="cur" value={cur} onChange={(e) => setCur(e.target.value)} className="w-36">{DISPLAY_CURRENCIES.map((c) => <option key={c} value={c}>{c === "original" ? "Original" : c}</option>)}</Select></div>
       </div>
 
       {ws.applications.length === 0 ? <Empty>Add programmes to start comparing.</Empty> : rows.length === 0 ? <Empty>No programmes match these filters.</Empty> : (
@@ -112,6 +149,7 @@ function Compare() {
                 <Th>Status</Th>
                 <Th k="priority">Priority</Th>
                 <Th k="readiness" className="w-44">Readiness</Th>
+                <Th>My notes</Th>
                 <Th><span className="sr-only">Actions</span></Th>
               </tr>
             </thead>
@@ -123,9 +161,9 @@ function Compare() {
                     {a.shortlisted && <span className="ml-2"><Badge tone="success">Shortlist</Badge></span>}
                   </th>
                   <td className="px-4 py-3">{p.universities?.name}<p className="text-xs text-muted-foreground">{p.universities?.country}</p></td>
-                  <td className="px-4 py-3 tabular-nums">{money(p.tuition, p.currency)}<p className="text-xs text-muted-foreground">Fee {money(p.application_fee, p.currency)}</p></td>
+                  <td className="px-4 py-3 tabular-nums">{showMoney(p.tuition, p.currency)}<p className="text-xs text-muted-foreground">Fee {showMoney(p.application_fee, p.currency)}</p>{cur !== "original" && cur !== p.currency && <p className="text-xs text-muted-foreground">({money(p.tuition, p.currency)})</p>}</td>
                   <td className="px-4 py-3">{p.duration_months} mo<p className="text-xs text-muted-foreground">{p.intake}</p></td>
-                  <td className="px-4 py-3 tabular-nums">{p.min_gpa ?? "—"}</td>
+                  <td className="px-4 py-3 tabular-nums">{p.min_gpa ?? "—"}{(() => { const g = gpaGap(profile.data?.gpa, p.min_gpa); return g && <p className="mt-1 max-w-[9rem] rounded bg-warning/20 px-1.5 py-0.5 text-xs text-foreground" title="Your GPA is below the listed minimum. Strong experience or test scores may still help.">⚠ Your GPA {g.user} is below {g.min}</p>; })()}</td>
                   <td className="px-4 py-3">{p.english_test || "—"}</td>
                   <td className="px-4 py-3 tabular-nums">{p.references_required}</td>
                   <td className="px-4 py-3 space-x-1">{p.portfolio_required && <Badge>Portfolio</Badge>}{p.interview && <Badge>Interview</Badge>}{!p.portfolio_required && !p.interview && "—"}</td>
@@ -133,6 +171,7 @@ function Compare() {
                   <td className="px-4 py-3">{label(STATUSES, a.status)}</td>
                   <td className="px-4 py-3">{["", "High", "Medium", "Low"][a.priority]}</td>
                   <td className="px-4 py-3"><Progress value={r.pct} label={`${p.name} readiness`} /><p className="mt-1 text-xs text-muted-foreground">{r.ready}/{r.total} items ready</p></td>
+                  <td className="px-4 py-3 w-64"><NotesCell appId={a.id} notes={(notes.data ?? []).filter((n) => n.application_id === a.id)} onSaved={() => notes.refetch()} /></td>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => removeProgramme(a.id, `${p.degree} ${p.name}`)}
                       aria-label={`Remove ${p.name}`} title="Remove from plan"
