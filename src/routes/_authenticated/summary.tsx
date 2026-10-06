@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace, useRefresh, readiness, nextDeadline, formatDate, money, label, STATUSES, TIERS, toCsv, downloadFile } from "@/lib/atlas";
 import { Badge, Button, Card, Empty, PageHeader, Progress, Select } from "@/components/ui-kit";
@@ -46,7 +47,7 @@ function Summary() {
         title="Shortlist & strategy"
         description="Sort your programmes into Reach, Target and Safety, then print or export your plan."
         actions={<div className="flex gap-2 print:hidden">
-          <Button variant="outline" onClick={exportCsv}>Export CSV</Button>
+          <Button variant="outline" onClick={() => { exportCsv(); toast.success("CSV downloaded"); }}>Export CSV</Button>
           <Button onClick={() => window.print()}>Print report</Button>
         </div>}
       />
