@@ -133,13 +133,34 @@ export function nextDeadline(ws: Pick<Workspace, "deadlines">, programmeId: stri
 }
 
 export function downloadFile(name: string, content: string, type = "text/csv") {
-  const blob = new Blob([content], { type });
+  const body = type === "text/csv" ? "\uFEFF" + content : content;
+  const blob = new Blob([body], { type: `${type};charset=utf-8` });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = name;
+  a.rel = "noopener";
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 1500);
+  // In embedded previews downloads can be blocked; also open as fallback
+  try { if (window.self !== window.top) window.open(url, "_blank"); } catch { /* ignore */ }
+}
+
+// Approximate fixed exchange rates to HKD (for planning only)
+export const RATES_TO_HKD: Record<string, number> = { HKD: 1, GBP: 10.2, USD: 7.8, EUR: 8.5, SGD: 5.9, AUD: 5.1, CAD: 5.7, CNY: 1.08, JPY: 0.052, CHF: 8.9 };
+export const DISPLAY_CURRENCIES = ["original", "HKD", "USD", "GBP", "EUR", "SGD", "AUD", "CNY"] as const;
+export function convert(n: number, from: string, to: string) {
+  const a = RATES_TO_HKD[from], b = RATES_TO_HKD[to];
+  if (!a || !b) return null;
+  return (n * a) / b;
+}
+
+export function gpaGap(userGpa: string | null | undefined, minGpa: number | null) {
+  const g = parseFloat(userGpa ?? "");
+  if (!minGpa || isNaN(g)) return null;
+  return g < minGpa ? { user: g, min: minGpa } : null;
 }
 export function toCsv(rows: (string | number)[][]) {
   return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
