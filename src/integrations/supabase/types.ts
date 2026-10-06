@@ -154,6 +154,8 @@ export type Database = {
         Row: {
           created_at: string
           doc_type: string
+          file_name: string
+          file_path: string
           id: string
           link: string
           notes: string
@@ -164,6 +166,8 @@ export type Database = {
         Insert: {
           created_at?: string
           doc_type?: string
+          file_name?: string
+          file_path?: string
           id?: string
           link?: string
           notes?: string
@@ -174,6 +178,8 @@ export type Database = {
         Update: {
           created_at?: string
           doc_type?: string
+          file_name?: string
+          file_path?: string
           id?: string
           link?: string
           notes?: string
