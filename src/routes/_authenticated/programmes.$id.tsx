@@ -15,8 +15,10 @@ function ProgrammeDetail() {
   const { id } = Route.useParams();
   const { data: ws, isLoading } = useWorkspace();
   const refresh = useRefresh();
+  const profile = useProfile();
   const [note, setNote] = useState("");
   const [err, setErr] = useState("");
+  const [cur, setCur] = useState<string>("");
 
   const app = ws?.applications.find((a) => a.id === id || a.programme_id === id);
   const notes = useQuery({
