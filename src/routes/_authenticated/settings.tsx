@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/components/AddProgramme";
-import { PLANS, planOf } from "@/lib/plans";
+import { PLANS, planOf, planPrice } from "@/lib/plans";
 import { Badge, Button, Card, Field, Input, PageHeader, Select } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -74,7 +74,7 @@ function Settings() {
           <ul className="space-y-2">
             {PLANS.map((p) => (
               <li key={p.id} className="flex items-center justify-between rounded-md border border-border p-3 text-sm">
-                <span><span className="font-medium">{p.name}</span> · {p.price} {p.period}</span>
+                <span><span className="font-medium">{p.name}</span> · {planPrice(p, f.currency)} {p.period}</span>
                 {p.id === plan.id ? <Badge tone="success">Active</Badge> : <Button size="sm" variant="outline" onClick={() => setPlan(p.id)}>Switch (test)</Button>}
               </li>
             ))}
