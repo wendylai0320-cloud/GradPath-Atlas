@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useWorkspace, useRefresh, readiness, formatDate, money, daysUntil, label, STATUSES, DOC_TYPES, DOC_STATUSES, TIERS, type Note } from "@/lib/atlas";
+import { useWorkspace, useRefresh, readiness, formatDate, money, daysUntil, label, STATUSES, DOC_TYPES, DOC_STATUSES, TIERS, convert, gpaGap, DISPLAY_CURRENCIES, type Note } from "@/lib/atlas";
+import { useProfile } from "@/components/AddProgramme";
 import { Badge, Button, Card, DeadlineBadge, Empty, Field, PageHeader, Progress, Select, Textarea } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/_authenticated/programmes/$id")({
@@ -14,8 +15,10 @@ function ProgrammeDetail() {
   const { id } = Route.useParams();
   const { data: ws, isLoading } = useWorkspace();
   const refresh = useRefresh();
+  const profile = useProfile();
   const [note, setNote] = useState("");
   const [err, setErr] = useState("");
+  const [cur, setCur] = useState<string>("");
 
   const app = ws?.applications.find((a) => a.id === id || a.programme_id === id);
   const notes = useQuery({
@@ -36,6 +39,8 @@ function ProgrammeDetail() {
   const r = readiness(ws, app);
   const deadlines = ws.deadlines.filter((d) => d.programme_id === prog.id);
   const linkedIds = new Set(ws.links.filter((l) => l.application_id === app.id).map((l) => l.document_id));
+  const effCur = cur || ((profile.data as { currency?: string } | undefined)?.currency ?? "original");
+  const showConverted = effCur !== "original" && effCur !== prog.currency;
 
   async function update(patch: { status?: string; tier?: string; priority?: number; shortlisted?: boolean; adviser_comment?: string }) {
     setErr("");
@@ -84,10 +89,18 @@ function ProgrammeDetail() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card className="p-5">
-            <h2 className="mb-3 font-serif text-lg">Key facts</h2>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-serif text-lg">Key facts</h2>
+              <div className="flex items-center gap-2">
+                <label htmlFor="cur" className="text-sm text-muted-foreground">Show fees in</label>
+                <Select id="cur" value={effCur} onChange={(e) => setCur(e.target.value)} className="w-32">
+                  {DISPLAY_CURRENCIES.map((c) => <option key={c} value={c}>{c === "original" ? "Original" : c}</option>)}
+                </Select>
+              </div>
+            </div>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
               {[
-                ["Tuition", money(prog.tuition, prog.currency)],
+                ["Tuition", showConverted ? money(convert(prog.tuition, prog.currency, effCur) ?? prog.tuition, effCur) : money(prog.tuition, prog.currency)],
                 ["Duration", `${prog.duration_months} months`],
                 ["Intake", prog.intake],
                 ["Mode", prog.study_mode],
@@ -97,7 +110,14 @@ function ProgrammeDetail() {
                 ["Portfolio", prog.portfolio_required ? "Required" : "No"],
                 ["Interview", prog.interview ? "Yes" : "No"],
               ].map(([k, v]) => (
-                <div key={String(k)}><dt className="text-muted-foreground">{k}</dt><dd className="font-medium">{v}</dd></div>
+                <div key={String(k)}>
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="font-medium">{v}</dd>
+                  {k === "Tuition" && showConverted && (
+                    <p className="text-xs text-muted-foreground">≈ converted from {money(prog.tuition, prog.currency)} · approximate rate</p>
+                  )}
+                  {k === "Min. GPA" && (() => { const min = prog.min_gpa; if (min == null) return null; const g = gpaGap((profile.data as { gpa?: string } | undefined)?.gpa, min); return g && <p className="mt-1 max-w-[11rem] rounded bg-warning/20 px-1.5 py-0.5 text-xs text-foreground" title="Your GPA is below the listed minimum. Strong experience or test scores may still help.">⚠ Your GPA {g.user} is below {g.min}</p>; })()}
+                </div>
               ))}
             </dl>
             {prog.summary && <p className="mt-4 text-sm text-muted-foreground">{prog.summary}</p>}
