@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useWorkspace, useRefresh, readiness, formatDate, money, daysUntil, label, STATUSES, DOC_TYPES, DOC_STATUSES, TIERS, type Note } from "@/lib/atlas";
+import { useWorkspace, useRefresh, readiness, formatDate, money, daysUntil, label, STATUSES, DOC_TYPES, DOC_STATUSES, TIERS, convert, gpaGap, DISPLAY_CURRENCIES, type Note } from "@/lib/atlas";
+import { useProfile } from "@/components/AddProgramme";
 import { Badge, Button, Card, DeadlineBadge, Empty, Field, PageHeader, Progress, Select, Textarea } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/_authenticated/programmes/$id")({
