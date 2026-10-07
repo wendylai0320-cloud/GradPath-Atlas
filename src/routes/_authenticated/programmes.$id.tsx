@@ -39,6 +39,8 @@ function ProgrammeDetail() {
   const r = readiness(ws, app);
   const deadlines = ws.deadlines.filter((d) => d.programme_id === prog.id);
   const linkedIds = new Set(ws.links.filter((l) => l.application_id === app.id).map((l) => l.document_id));
+  const effCur = cur || ((profile.data as { currency?: string } | undefined)?.currency ?? "original");
+  const showConverted = effCur !== "original" && effCur !== prog.currency;
 
   async function update(patch: { status?: string; tier?: string; priority?: number; shortlisted?: boolean; adviser_comment?: string }) {
     setErr("");
