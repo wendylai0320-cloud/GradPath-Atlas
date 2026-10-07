@@ -100,7 +100,7 @@ function ProgrammeDetail() {
             </div>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
               {[
-                ["Tuition", showConverted ? money(convert(prog.tuition, prog.currency, effCur), effCur) : money(prog.tuition, prog.currency)],
+                ["Tuition", showConverted ? money(convert(prog.tuition, prog.currency, effCur) ?? prog.tuition, effCur) : money(prog.tuition, prog.currency)],
                 ["Duration", `${prog.duration_months} months`],
                 ["Intake", prog.intake],
                 ["Mode", prog.study_mode],
