@@ -116,7 +116,7 @@ function ProgrammeDetail() {
                   {k === "Tuition" && showConverted && (
                     <p className="text-xs text-muted-foreground">≈ converted from {money(prog.tuition, prog.currency)} · approximate rate</p>
                   )}
-                  {k === "Min. GPA" && (() => { const g = gpaGap((profile.data as { gpa?: string } | undefined)?.gpa, prog.min_gpa); return g && <p className="mt-1 max-w-[11rem] rounded bg-warning/20 px-1.5 py-0.5 text-xs text-foreground" title="Your GPA is below the listed minimum. Strong experience or test scores may still help.">⚠ Your GPA {g.user} is below {g.min}</p>; })()}
+                  {k === "Min. GPA" && prog.min_gpa != null && (() => { const g = gpaGap((profile.data as { gpa?: string } | undefined)?.gpa, prog.min_gpa); return g && <p className="mt-1 max-w-[11rem] rounded bg-warning/20 px-1.5 py-0.5 text-xs text-foreground" title="Your GPA is below the listed minimum. Strong experience or test scores may still help.">⚠ Your GPA {g.user} is below {g.min}</p>; })()}
                 </div>
               ))}
             </dl>
