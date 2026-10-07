@@ -87,7 +87,15 @@ function ProgrammeDetail() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card className="p-5">
-            <h2 className="mb-3 font-serif text-lg">Key facts</h2>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-serif text-lg">Key facts</h2>
+              <div className="flex items-center gap-2">
+                <label htmlFor="cur" className="text-sm text-muted-foreground">Show fees in</label>
+                <Select id="cur" value={cur || ((profile.data as { currency?: string } | undefined)?.currency ?? "original")} onChange={(e) => setCur(e.target.value)} className="w-32">
+                  {DISPLAY_CURRENCIES.map((c) => <option key={c} value={c}>{c === "original" ? "Original" : c}</option>)}
+                </Select>
+              </div>
+            </div>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
               {[
                 ["Tuition", money(prog.tuition, prog.currency)],
@@ -100,7 +108,18 @@ function ProgrammeDetail() {
                 ["Portfolio", prog.portfolio_required ? "Required" : "No"],
                 ["Interview", prog.interview ? "Yes" : "No"],
               ].map(([k, v]) => (
-                <div key={String(k)}><dt className="text-muted-foreground">{k}</dt><dd className="font-medium">{v}</dd></div>
+                <div key={String(k)}>
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="font-medium">
+                    {k === "Tuition" && (cur || (profile.data as { currency?: string } | undefined)?.currency) && (cur || (profile.data as { currency?: string } | undefined)?.currency) !== "original" && (cur || (profile.data as { currency?: string } | undefined)?.currency) !== prog.currency
+                      ? money(convert(prog.tuition, prog.currency, (cur || (profile.data as { currency?: string } | undefined)?.currency)!), (cur || (profile.data as { currency?: string } | undefined)?.currency)!)
+                      : v}
+                  </dd>
+                  {k === "Tuition" && (cur || (profile.data as { currency?: string } | undefined)?.currency) && (cur || (profile.data as { currency?: string } | undefined)?.currency) !== "original" && (cur || (profile.data as { currency?: string } | undefined)?.currency) !== prog.currency && (
+                    <p className="text-xs text-muted-foreground">≈ converted from {money(prog.tuition, prog.currency)} · approximate rate</p>
+                  )}
+                  {k === "Min. GPA" && (() => { const g = gpaGap((profile.data as { gpa?: string } | undefined)?.gpa, prog.min_gpa); return g && <p className="mt-1 max-w-[11rem] rounded bg-warning/20 px-1.5 py-0.5 text-xs text-foreground" title="Your GPA is below the listed minimum. Strong experience or test scores may still help.">⚠ Your GPA {g.user} is below {g.min}</p>; })()}
+                </div>
               ))}
             </dl>
             {prog.summary && <p className="mt-4 text-sm text-muted-foreground">{prog.summary}</p>}
