@@ -207,24 +207,28 @@ function ProgrammeDetail() {
           <Card className="space-y-4 p-5">
             <h2 className="font-serif text-lg">Application status</h2>
             <Field label="Status" htmlFor="status">
-              <Select id="status" value={app.status} onChange={(e) => update({ status: e.target.value })}>
+              <Select id="status" value={draft?.status ?? app.status} onChange={(e) => setDraft({ status: e.target.value, tier: draft?.tier ?? app.tier ?? "target", priority: draft?.priority ?? app.priority, shortlisted: draft?.shortlisted ?? app.shortlisted })}>
                 {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </Select>
             </Field>
             <Field label="Category" htmlFor="tier">
-              <Select id="tier" value={app.tier ?? "target"} onChange={(e) => update({ tier: e.target.value })}>
+              <Select id="tier" value={draft?.tier ?? app.tier ?? "target"} onChange={(e) => setDraft({ status: draft?.status ?? app.status, tier: e.target.value, priority: draft?.priority ?? app.priority, shortlisted: draft?.shortlisted ?? app.shortlisted })}>
                 {TIERS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </Select>
             </Field>
             <Field label="Priority" htmlFor="priority">
-              <Select id="priority" value={app.priority} onChange={(e) => update({ priority: Number(e.target.value) })}>
+              <Select id="priority" value={draft?.priority ?? app.priority} onChange={(e) => setDraft({ status: draft?.status ?? app.status, tier: draft?.tier ?? app.tier ?? "target", priority: Number(e.target.value), shortlisted: draft?.shortlisted ?? app.shortlisted })}>
                 <option value={1}>High</option><option value={2}>Medium</option><option value={3}>Low</option>
               </Select>
             </Field>
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" className="size-4" checked={app.shortlisted} onChange={(e) => update({ shortlisted: e.target.checked })} />
+              <input type="checkbox" className="size-4" checked={draft?.shortlisted ?? app.shortlisted} onChange={(e) => setDraft({ status: draft?.status ?? app.status, tier: draft?.tier ?? app.tier ?? "target", priority: draft?.priority ?? app.priority, shortlisted: e.target.checked })} />
               On my shortlist
             </label>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={saveDraft} disabled={!draft || saving}>{saving ? "Saving…" : "Save changes"}</Button>
+              {draft && <Button size="sm" variant="ghost" onClick={() => setDraft(null)}>Discard</Button>}
+            </div>
             <Button variant="danger" size="sm" onClick={untrack}>Stop tracking</Button>
           </Card>
 
