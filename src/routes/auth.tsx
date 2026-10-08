@@ -57,8 +57,22 @@ function AuthPage() {
           email, password,
           options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { display_name: name } },
         });
-        if (error) throw error;
-        if (!data.session) setMsg({ tone: "ok", text: "Check your inbox to confirm your email, then sign in." });
+        if (error) {
+          if (/already registered|already exists/i.test(error.message)) {
+            setAlreadyRegistered(true);
+            setMsg({ tone: "error", text: "An account with this email is already registered. Please sign in instead." });
+            return;
+          }
+          throw error;
+        }
+        if (!data.session) {
+          if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+            setAlreadyRegistered(true);
+            setMsg({ tone: "error", text: "An account with this email is already registered. Please sign in instead." });
+          } else {
+            setMsg({ tone: "ok", text: "Check your inbox to confirm your email, then sign in." });
+          }
+        }
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
         if (error) throw error;
