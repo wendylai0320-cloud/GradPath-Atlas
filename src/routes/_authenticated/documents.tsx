@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated/documents")({
   component: Documents,
 });
 
-const blank = { title: "", doc_type: "cv", status: "not_started", link: "", notes: "" };
+const blank = { title: "", doc_type: "cv", status: "not_started", link: "", notes: "", programme: "" };
 
 function Documents() {
   const { data: ws, isLoading } = useWorkspace();
