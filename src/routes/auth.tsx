@@ -33,6 +33,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -48,6 +49,7 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
+    setAlreadyRegistered(false);
     try {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
