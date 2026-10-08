@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { useWorkspace, useRefresh, readiness, formatDate, money, daysUntil, label, STATUSES, DOC_TYPES, DOC_STATUSES, TIERS, convert, gpaGap, DISPLAY_CURRENCIES, type Note } from "@/lib/atlas";
 import { useProfile } from "@/components/AddProgramme";
 import { Badge, Button, Card, DeadlineBadge, Empty, Field, PageHeader, Progress, Select, Textarea } from "@/components/ui-kit";
@@ -19,6 +20,8 @@ function ProgrammeDetail() {
   const [note, setNote] = useState("");
   const [err, setErr] = useState("");
   const [cur, setCur] = useState<string>("");
+  const [draft, setDraft] = useState<{ status: string; tier: string; priority: number; shortlisted: boolean } | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const app = ws?.applications.find((a) => a.id === id || a.programme_id === id);
   const notes = useQuery({
@@ -46,6 +49,17 @@ function ProgrammeDetail() {
     setErr("");
     const { error } = await supabase.from("applications").update(patch).eq("id", app!.id);
     if (error) setErr(error.message);
+    refresh();
+  }
+  async function saveDraft() {
+    if (!draft) return;
+    setSaving(true);
+    setErr("");
+    const { error } = await supabase.from("applications").update(draft).eq("id", app!.id);
+    setSaving(false);
+    if (error) return setErr(error.message);
+    setDraft(null);
+    toast.success("Changes saved");
     refresh();
   }
   async function toggleDoc(docId: string) {
@@ -193,24 +207,28 @@ function ProgrammeDetail() {
           <Card className="space-y-4 p-5">
             <h2 className="font-serif text-lg">Application status</h2>
             <Field label="Status" htmlFor="status">
-              <Select id="status" value={app.status} onChange={(e) => update({ status: e.target.value })}>
+              <Select id="status" value={draft?.status ?? app.status} onChange={(e) => setDraft({ status: e.target.value, tier: draft?.tier ?? app.tier ?? "target", priority: draft?.priority ?? app.priority, shortlisted: draft?.shortlisted ?? app.shortlisted })}>
                 {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </Select>
             </Field>
             <Field label="Category" htmlFor="tier">
-              <Select id="tier" value={app.tier ?? "target"} onChange={(e) => update({ tier: e.target.value })}>
+              <Select id="tier" value={draft?.tier ?? app.tier ?? "target"} onChange={(e) => setDraft({ status: draft?.status ?? app.status, tier: e.target.value, priority: draft?.priority ?? app.priority, shortlisted: draft?.shortlisted ?? app.shortlisted })}>
                 {TIERS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </Select>
             </Field>
             <Field label="Priority" htmlFor="priority">
-              <Select id="priority" value={app.priority} onChange={(e) => update({ priority: Number(e.target.value) })}>
+              <Select id="priority" value={draft?.priority ?? app.priority} onChange={(e) => setDraft({ status: draft?.status ?? app.status, tier: draft?.tier ?? app.tier ?? "target", priority: Number(e.target.value), shortlisted: draft?.shortlisted ?? app.shortlisted })}>
                 <option value={1}>High</option><option value={2}>Medium</option><option value={3}>Low</option>
               </Select>
             </Field>
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" className="size-4" checked={app.shortlisted} onChange={(e) => update({ shortlisted: e.target.checked })} />
+              <input type="checkbox" className="size-4" checked={draft?.shortlisted ?? app.shortlisted} onChange={(e) => setDraft({ status: draft?.status ?? app.status, tier: draft?.tier ?? app.tier ?? "target", priority: draft?.priority ?? app.priority, shortlisted: e.target.checked })} />
               On my shortlist
             </label>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={saveDraft} disabled={!draft || saving}>{saving ? "Saving…" : "Save changes"}</Button>
+              {draft && <Button size="sm" variant="ghost" onClick={() => setDraft(null)}>Discard</Button>}
+            </div>
             <Button variant="danger" size="sm" onClick={untrack}>Stop tracking</Button>
           </Card>
 

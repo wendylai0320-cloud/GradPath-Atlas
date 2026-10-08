@@ -32,7 +32,7 @@ function NotesCell({ appId, notes, onSaved }: { appId: string; notes: { id: stri
     <div className="space-y-1.5">
       {notes.slice(-3).map((n) => <p key={n.id} className="rounded bg-muted px-2 py-1 text-xs">{n.body}</p>)}
       <div className="flex gap-1">
-        <Input aria-label="Add note" placeholder="Add a note…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} className="h-8 text-xs" />
+        <Input aria-label="Add note" placeholder="Add a note…" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }} className="h-8 px-2 py-1 text-xs" />
         <Button size="sm" variant="outline" onClick={add} disabled={busy || !text.trim()}>Add</Button>
       </div>
     </div>
@@ -149,7 +149,7 @@ function Compare() {
                 <Th k="deadline">Next deadline</Th>
                 <Th>Status</Th>
                 <Th k="priority">Priority</Th>
-                <Th k="readiness" className="w-44">Readiness</Th>
+                <Th k="readiness" className="w-44">Required documents</Th>
                 <Th>My notes</Th>
                 <Th><span className="sr-only">Actions</span></Th>
               </tr>

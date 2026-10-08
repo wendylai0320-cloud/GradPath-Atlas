@@ -144,8 +144,6 @@ export function downloadFile(name: string, content: string, type = "text/csv") {
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 1500);
-  // In embedded previews downloads can be blocked; also open as fallback
-  try { if (window.self !== window.top) window.open(url, "_blank"); } catch { /* ignore */ }
 }
 
 // Approximate fixed exchange rates to HKD (for planning only)

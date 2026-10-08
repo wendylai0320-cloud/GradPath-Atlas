@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated/documents")({
   component: Documents,
 });
 
-const blank = { title: "", doc_type: "cv", status: "not_started", link: "", notes: "" };
+const blank = { title: "", doc_type: "cv", status: "not_started", link: "", notes: "", programme: "" };
 
 function Documents() {
   const { data: ws, isLoading } = useWorkspace();
@@ -31,7 +31,8 @@ function Documents() {
     if (!f.title.trim()) return setErr("Please give the document a title.");
     if (file && file.size > 20 * 1024 * 1024) return setErr("That file is larger than 20 MB.");
     setBusy(true);
-    const payload: typeof f & { file_path?: string; file_name?: string } = { ...f };
+    const { programme, ...docFields } = f;
+    const payload: typeof docFields & { file_path?: string; file_name?: string } = { ...docFields };
     if (file) {
       const path = `${ws!.userId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
       const up = await supabase.storage.from("documents").upload(path, file);
@@ -43,9 +44,19 @@ function Documents() {
     }
     const res = editing
       ? await supabase.from("documents").update(payload).eq("id", editing)
-      : await supabase.from("documents").insert({ ...payload, title: f.title, user_id: ws!.userId });
+      : await supabase.from("documents").insert({ ...payload, title: f.title, user_id: ws!.userId }).select("id").single();
+    if (res.error) { setBusy(false); return setErr(res.error.message); }
+    const docId = editing ?? (res.data as { id: string } | null)?.id;
+    if (docId) {
+      const existing = ws!.links.filter((l) => l.document_id === docId).map((l) => l.application_id);
+      if (programme && !existing.includes(programme)) {
+        await supabase.from("application_documents").insert({ application_id: programme, document_id: docId, user_id: ws!.userId });
+      }
+      if (!programme && editing && existing.length) {
+        await supabase.from("application_documents").delete().eq("document_id", docId);
+      }
+    }
     setBusy(false);
-    if (res.error) return setErr(res.error.message);
     setF(blank);
     setFile(null);
     (document.getElementById("fl") as HTMLInputElement | null)?.value && ((document.getElementById("fl") as HTMLInputElement).value = "");
@@ -100,6 +111,12 @@ function Documents() {
               <input id="fl" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm file:mr-3 file:rounded-md file:border file:border-input file:bg-secondary file:px-3 file:py-1.5 file:text-sm" />
             </Field>
             <Field label="Link (optional)" htmlFor="ln" hint="Paste a Google Drive or OneDrive link."><Input id="ln" type="url" value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} /></Field>
+            <Field label="Link to programme (optional)" htmlFor="pg" hint="Attach this document to one of your tracked programmes.">
+              <Select id="pg" value={f.programme} onChange={(e) => setF({ ...f, programme: e.target.value })}>
+                <option value="">— Not linked —</option>
+                {ws!.applications.map((a) => <option key={a.id} value={a.id}>{ws!.programmes.find((p) => p.id === a.programme_id)?.name}</option>)}
+              </Select>
+            </Field>
             <Field label="Notes" htmlFor="nt"><Textarea id="nt" rows={2} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></Field>
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
             <div className="flex gap-2">
@@ -145,7 +162,7 @@ function Documents() {
                   <Select id={`s-${d.id}`} className="h-8 w-32" value={d.status} onChange={(e) => setStatus(d, e.target.value)}>
                     {DOC_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </Select>
-                  <Button size="sm" variant="ghost" onClick={() => { setEditing(d.id); setF({ title: d.title, doc_type: d.doc_type, status: d.status, link: d.link, notes: d.notes }); }}>Edit</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setEditing(d.id); setF({ title: d.title, doc_type: d.doc_type, status: d.status, link: d.link, notes: d.notes, programme: linkedTo(d)[0] ?? "" }); }}>Edit</Button>
                   <Button size="sm" variant="danger" onClick={() => remove(d)}>Delete</Button>
                 </div>
               </div>
