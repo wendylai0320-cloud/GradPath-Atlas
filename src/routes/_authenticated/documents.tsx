@@ -162,7 +162,7 @@ function Documents() {
                   <Select id={`s-${d.id}`} className="h-8 w-32" value={d.status} onChange={(e) => setStatus(d, e.target.value)}>
                     {DOC_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </Select>
-                  <Button size="sm" variant="ghost" onClick={() => { setEditing(d.id); setF({ title: d.title, doc_type: d.doc_type, status: d.status, link: d.link, notes: d.notes }); }}>Edit</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setEditing(d.id); setF({ title: d.title, doc_type: d.doc_type, status: d.status, link: d.link, notes: d.notes, programme: linkedTo(d)[0] ?? "" }); }}>Edit</Button>
                   <Button size="sm" variant="danger" onClick={() => remove(d)}>Delete</Button>
                 </div>
               </div>
