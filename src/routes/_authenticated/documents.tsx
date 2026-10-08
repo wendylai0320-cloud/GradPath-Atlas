@@ -111,6 +111,12 @@ function Documents() {
               <input id="fl" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm file:mr-3 file:rounded-md file:border file:border-input file:bg-secondary file:px-3 file:py-1.5 file:text-sm" />
             </Field>
             <Field label="Link (optional)" htmlFor="ln" hint="Paste a Google Drive or OneDrive link."><Input id="ln" type="url" value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} /></Field>
+            <Field label="Link to programme (optional)" htmlFor="pg" hint="Attach this document to one of your tracked programmes.">
+              <Select id="pg" value={f.programme} onChange={(e) => setF({ ...f, programme: e.target.value })}>
+                <option value="">— Not linked —</option>
+                {ws!.applications.map((a) => <option key={a.id} value={a.id}>{ws!.programmes.find((p) => p.id === a.programme_id)?.name}</option>)}
+              </Select>
+            </Field>
             <Field label="Notes" htmlFor="nt"><Textarea id="nt" rows={2} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></Field>
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
             <div className="flex gap-2">
