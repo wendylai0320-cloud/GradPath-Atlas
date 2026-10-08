@@ -51,6 +51,17 @@ function ProgrammeDetail() {
     if (error) setErr(error.message);
     refresh();
   }
+  async function saveDraft() {
+    if (!draft) return;
+    setSaving(true);
+    setErr("");
+    const { error } = await supabase.from("applications").update(draft).eq("id", app!.id);
+    setSaving(false);
+    if (error) return setErr(error.message);
+    setDraft(null);
+    toast.success("Changes saved");
+    refresh();
+  }
   async function toggleDoc(docId: string) {
     if (linkedIds.has(docId)) await supabase.from("application_documents").delete().eq("application_id", app!.id).eq("document_id", docId);
     else await supabase.from("application_documents").insert({ application_id: app!.id, document_id: docId, user_id: ws!.userId });
