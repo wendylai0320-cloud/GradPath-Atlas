@@ -31,7 +31,8 @@ function Documents() {
     if (!f.title.trim()) return setErr("Please give the document a title.");
     if (file && file.size > 20 * 1024 * 1024) return setErr("That file is larger than 20 MB.");
     setBusy(true);
-    const payload: typeof f & { file_path?: string; file_name?: string } = { ...f };
+    const { programme, ...docFields } = f;
+    const payload: typeof docFields & { file_path?: string; file_name?: string } = { ...docFields };
     if (file) {
       const path = `${ws!.userId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
       const up = await supabase.storage.from("documents").upload(path, file);
@@ -43,9 +44,19 @@ function Documents() {
     }
     const res = editing
       ? await supabase.from("documents").update(payload).eq("id", editing)
-      : await supabase.from("documents").insert({ ...payload, title: f.title, user_id: ws!.userId });
+      : await supabase.from("documents").insert({ ...payload, title: f.title, user_id: ws!.userId }).select("id").single();
+    if (res.error) { setBusy(false); return setErr(res.error.message); }
+    const docId = editing ?? (res.data as { id: string } | null)?.id;
+    if (docId) {
+      const existing = ws!.links.filter((l) => l.document_id === docId).map((l) => l.application_id);
+      if (programme && !existing.includes(programme)) {
+        await supabase.from("application_documents").insert({ application_id: programme, document_id: docId, user_id: ws!.userId });
+      }
+      if (!programme && editing && existing.length) {
+        await supabase.from("application_documents").delete().eq("document_id", docId);
+      }
+    }
     setBusy(false);
-    if (res.error) return setErr(res.error.message);
     setF(blank);
     setFile(null);
     (document.getElementById("fl") as HTMLInputElement | null)?.value && ((document.getElementById("fl") as HTMLInputElement).value = "");
