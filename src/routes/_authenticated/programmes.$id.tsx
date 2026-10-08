@@ -20,6 +20,8 @@ function ProgrammeDetail() {
   const [note, setNote] = useState("");
   const [err, setErr] = useState("");
   const [cur, setCur] = useState<string>("");
+  const [draft, setDraft] = useState<{ status: string; tier: string; priority: number; shortlisted: boolean } | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const app = ws?.applications.find((a) => a.id === id || a.programme_id === id);
   const notes = useQuery({
