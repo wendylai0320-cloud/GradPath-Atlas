@@ -116,6 +116,11 @@ function AuthPage() {
               </Field>
             )}
             {msg && <p role="alert" className={msg.tone === "error" ? "text-sm text-destructive" : "text-sm text-accent-foreground"}>{msg.text}</p>}
+            {alreadyRegistered && (
+              <Button type="button" variant="outline" className="w-full" onClick={() => { setMode("signin"); setMsg(null); setAlreadyRegistered(false); }}>
+                Sign in with this email
+              </Button>
+            )}
             <Button type="submit" disabled={busy} className="w-full">
               {busy ? "Please wait…" : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}
             </Button>
