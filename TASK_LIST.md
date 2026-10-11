@@ -27,9 +27,25 @@
 - [x] Manual override of any auto-filled field / fully custom entry
 - [x] PRD.md and TASK_LIST.md
 - [x] Rename README title to GradPath Atlas
-- [ ] Invite instructor as GitHub collaborator (if repo is private)
+
+## Sprint 6 — Usability & polish
+- [x] Upload document files from device (PDF, Word, images, up to 20 MB) to private storage
+- [x] Programme filter and "Documents this programme needs" card in Document vault
+- [x] "Link to programme" dropdown in the document add/edit form
+- [x] Timeline / Calendar switch on Deadlines, with .ics calendar download
+- [x] Tuition currency conversion (7 currencies) on Compare and Programme detail
+- [x] Soft GPA warning when the saved GPA is below a programme minimum
+- [x] "My notes" column on Compare programmes
+- [x] "Save changes" / Discard buttons on the Programme detail status editor
+- [x] Rename Compare column to "Required documents"
+- [x] Delete-programme (trash) button per row on Compare
+- [x] CSV and calendar export downloads fixed
+- [x] "Already registered" email warning with one-click sign in
+- [x] Pricing page with "Show prices in" selector, defaulting to HKD (HK$0 / HK$150 / HK$60)
+- [ ] Invite instructor as GitHub collaborator (repo is public, so optional)
 
 ## Backlog
-- [ ] File uploads for documents
 - [ ] Email deadline reminders
 - [ ] Adviser comment threads
+- [ ] Live exchange rates instead of fixed approximate rates
+- [ ] Real payment for plan upgrades (currently test-only)
