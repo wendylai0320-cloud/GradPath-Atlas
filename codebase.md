@@ -47,6 +47,13 @@ dist-ssr
 
 ```
 
+# .nvmrc
+
+```
+24.21.0
+
+```
+
 # .prettierignore
 
 ```
@@ -10254,7 +10261,7 @@ CREATE POLICY "Own document files delete" ON storage.objects FOR DELETE TO authe
 ### Repository and runtime
 - [x] Confirm the working repository is `wendylai0320-cloud/GradPath-Atlas` (verified: Git origin and GitHub repository name match).
 - [x] Create a migration branch for the Next.js and Neon implementation (verified: active branch is `migration/nextjs-neon`).
-- [ ] Confirm the supported Node.js version and record it in `.nvmrc` or the project’s runtime configuration.
+- [x] Confirm the supported Node.js version and record it in `.nvmrc` or the project’s runtime configuration (verified: `.nvmrc` pins Node.js `24.21.0`, an LTS release compatible with the documented Next.js minimum).
 - [ ] Confirm the package manager and lockfile strategy.
 - [ ] Scaffold or migrate the application to Next.js App Router.
 - [ ] Confirm the application starts with `npm run dev` on port `3000`.
