@@ -20,6 +20,7 @@ dist-ssr
 .tanstack/**
 .nitro
 *.local
+.env
 
 # Wrangler / Cloudflare
 .wrangler/
@@ -210,7 +211,8 @@ export default nextConfig;
   "dependencies": {
     "next": "16.4.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
@@ -6874,6 +6876,48 @@ export const TIERS = [
 
 ```
 
+# src/lib/env.server.ts
+
+```ts
+import "server-only";
+
+export const SERVER_ENV_NAMES = [
+  "DATABASE_URL",
+  "CLERK_SECRET_KEY",
+  "CLERK_WEBHOOK_SECRET",
+  "STRIPE_SECRET_KEY",
+  "STRIPE_WEBHOOK_SECRET",
+  "STRIPE_PRICE_SEASON_PASS",
+  "IMAGEKIT_PUBLIC_KEY",
+  "IMAGEKIT_PRIVATE_KEY",
+  "GEMINI_API_KEY",
+] as const;
+
+export type ServerEnvName = (typeof SERVER_ENV_NAMES)[number];
+
+/**
+ * Validate only the integration keys required by the current server entry point.
+ * Call this from a server route or service before using that integration, so
+ * deferred integrations do not block build, development, or unrelated routes.
+ */
+export function validateServerEnv<const Names extends readonly ServerEnvName[]>(
+  names: Names,
+): { [Name in Names[number]]: string } {
+  const missing = names.filter((name) => !process.env[name]?.trim());
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required server environment variable(s): ${missing.join(", ")}`,
+    );
+  }
+
+  return Object.fromEntries(
+    names.map((name) => [name, process.env[name]!.trim()]),
+  ) as { [Name in Names[number]]: string };
+}
+
+```
+
 # src/lib/error-capture.ts
 
 ```ts
@@ -10279,35 +10323,35 @@ CREATE POLICY "Own document files delete" ON storage.objects FOR DELETE TO authe
 - [x] Scaffold or migrate the application to Next.js App Router (verified: npm dependencies installed and `npm run build` passed, including TypeScript and `/` route compilation).
 - [x] Confirm the application starts with `npm run dev` on port `3000` (verified: server logged ready, `GET /` returned HTTP 200, and the GradPath Atlas title rendered).
 - [x] Add or verify `.env.local` in `.gitignore` (verified: `git check-ignore -v --no-index .env.local` matches `.gitignore:19` pattern `*.local`; `.env.local` is not tracked and no file contents were read).
-- [ ] Add `.env.example` containing variable names and placeholder values only.
-- [ ] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs.
-- [ ] Inspect tracked environment files locally without printing their values.
-- [ ] Remove local environment files from Git tracking where appropriate.
-- [ ] Rotate any actual secret discovered in Git history or an exposed environment file.
+- [x] Add `.env.example` containing variable names and placeholder values only (verified: all 12 target variable names from the PRD are present with unmistakable placeholders; no local environment-file contents were accessed).
+- [x] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs (verified: redacted pattern scan passed across 11 tracked artifact files; no tracked screenshots or logs were present; local environment-file contents were not scanned or read).
+- [x] Inspect tracked environment files locally without printing their values (verified: the only tracked environment file is `.env`; inspected variable names only—`SUPABASE_PROJECT_ID`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, and their `VITE_` counterparts—and emitted no values. These names indicate legacy public Supabase configuration; no private credential was confirmed by this inspection).
+- [x] Remove local environment files from Git tracking where appropriate (verified: removed `.env` from the Git index but preserved the local file; `.env` is now ignored, and `.env.example` remains tracked).
+- [x] Rotate any actual secret discovered in Git history or an exposed environment file (verified: three historical revisions of the tracked `.env` were scanned with values redacted; no private-credential patterns or non-placeholder values under secret-named variables were detected, so no rotation was indicated).
 
 ### Environment variable names
-- [ ] Add `NEXT_PUBLIC_APP_URL` to `.env.example`.
-- [ ] Add `DATABASE_URL` to `.env.example`.
-- [ ] Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to `.env.example`.
-- [ ] Add `CLERK_SECRET_KEY` to `.env.example`.
-- [ ] Add `CLERK_WEBHOOK_SECRET` to `.env.example`.
-- [ ] Add `STRIPE_SECRET_KEY` to `.env.example`.
-- [ ] Add `STRIPE_WEBHOOK_SECRET` to `.env.example`.
-- [ ] Add `STRIPE_PRICE_SEASON_PASS` to `.env.example`.
-- [ ] Add `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` to `.env.example`.
-- [ ] Add `IMAGEKIT_PUBLIC_KEY` to `.env.example`.
-- [ ] Add `IMAGEKIT_PRIVATE_KEY` to `.env.example`.
-- [ ] Keep all server secrets out of variables prefixed with `NEXT_PUBLIC_`.
-- [ ] Add server-side startup validation for required environment variables.
-- [ ] Make missing-variable errors identify the variable name without revealing its value.
+- [x] Add `NEXT_PUBLIC_APP_URL` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `DATABASE_URL` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `CLERK_SECRET_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `CLERK_WEBHOOK_SECRET` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `STRIPE_SECRET_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `STRIPE_WEBHOOK_SECRET` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `STRIPE_PRICE_SEASON_PASS` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `IMAGEKIT_PUBLIC_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `IMAGEKIT_PRIVATE_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Keep all server secrets out of variables prefixed with `NEXT_PUBLIC_` (verified: all `NEXT_PUBLIC_*` sample values are non-secret placeholders for the app URL, Clerk publishable key, and ImageKit endpoint).
+- [x] Add server-side startup validation for required environment variables (implemented as a server-only, per-route validation helper so missing credentials for deferred integrations do not block builds or unrelated routes; `npm run build` passes).
+- [x] Make missing-variable errors identify the variable name without revealing its value (verified: a missing `DATABASE_URL` error named the variable and did not include a separate configured sentinel value).
 
 #### Verification Gate — Module 1
-- [ ] Run `git check-ignore .env.local` and confirm the local environment file is ignored.
-- [ ] Confirm `.env.example` contains placeholders only.
-- [ ] Confirm no secret values are tracked by Git or included in source files.
-- [ ] Run `npm run build` and confirm zero TypeScript or routing compilation errors.
-- [ ] Run `npm run dev` and confirm the app renders at `http://localhost:3000`.
-- [ ] Check the browser console and confirm there are no startup errors.
+- [x] Run `git check-ignore .env.local` and confirm the local environment file is ignored (verified: `.gitignore:19` matches `*.local`).
+- [x] Confirm `.env.example` contains placeholders only (verified: all 12 values matched placeholder rules).
+- [x] Confirm no secret values are tracked by Git or included in source files (verified: redacted pattern scan passed across 114 tracked text files; no known credential patterns found; `.env` is no longer tracked).
+- [x] Run `npm run build` and confirm zero TypeScript or routing compilation errors (verified: Next.js production build, TypeScript, and App Router compilation passed).
+- [x] Run `npm run dev` and confirm the app renders at `http://localhost:3000` (verified: root route returned HTTP 200 and the title/content rendered).
+- [x] Check the browser console and confirm there are no startup errors (verified: no error entries; only React DevTools info and Next.js HMR connected messages).
 
 ## Module 2: Database Schema & ORM Provisioning (Drizzle/PostgreSQL)
 

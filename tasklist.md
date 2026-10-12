@@ -24,27 +24,27 @@
 
 ### Environment variable names
 - [x] Add `NEXT_PUBLIC_APP_URL` to `.env.example` (verified: required name is present with a placeholder value).
-- [ ] Add `DATABASE_URL` to `.env.example`.
-- [ ] Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to `.env.example`.
-- [ ] Add `CLERK_SECRET_KEY` to `.env.example`.
-- [ ] Add `CLERK_WEBHOOK_SECRET` to `.env.example`.
-- [ ] Add `STRIPE_SECRET_KEY` to `.env.example`.
-- [ ] Add `STRIPE_WEBHOOK_SECRET` to `.env.example`.
-- [ ] Add `STRIPE_PRICE_SEASON_PASS` to `.env.example`.
-- [ ] Add `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` to `.env.example`.
-- [ ] Add `IMAGEKIT_PUBLIC_KEY` to `.env.example`.
-- [ ] Add `IMAGEKIT_PRIVATE_KEY` to `.env.example`.
-- [ ] Keep all server secrets out of variables prefixed with `NEXT_PUBLIC_`.
-- [ ] Add server-side startup validation for required environment variables.
-- [ ] Make missing-variable errors identify the variable name without revealing its value.
+- [x] Add `DATABASE_URL` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `CLERK_SECRET_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `CLERK_WEBHOOK_SECRET` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `STRIPE_SECRET_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `STRIPE_WEBHOOK_SECRET` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `STRIPE_PRICE_SEASON_PASS` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `IMAGEKIT_PUBLIC_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Add `IMAGEKIT_PRIVATE_KEY` to `.env.example` (verified: required name is present with a placeholder value).
+- [x] Keep all server secrets out of variables prefixed with `NEXT_PUBLIC_` (verified: all `NEXT_PUBLIC_*` sample values are non-secret placeholders for the app URL, Clerk publishable key, and ImageKit endpoint).
+- [x] Add server-side startup validation for required environment variables (implemented as a server-only, per-route validation helper so missing credentials for deferred integrations do not block builds or unrelated routes; `npm run build` passes).
+- [x] Make missing-variable errors identify the variable name without revealing its value (verified: a missing `DATABASE_URL` error named the variable and did not include a separate configured sentinel value).
 
 #### Verification Gate — Module 1
-- [ ] Run `git check-ignore .env.local` and confirm the local environment file is ignored.
-- [ ] Confirm `.env.example` contains placeholders only.
-- [ ] Confirm no secret values are tracked by Git or included in source files.
-- [ ] Run `npm run build` and confirm zero TypeScript or routing compilation errors.
-- [ ] Run `npm run dev` and confirm the app renders at `http://localhost:3000`.
-- [ ] Check the browser console and confirm there are no startup errors.
+- [x] Run `git check-ignore .env.local` and confirm the local environment file is ignored (verified: `.gitignore:19` matches `*.local`).
+- [x] Confirm `.env.example` contains placeholders only (verified: all 12 values matched placeholder rules).
+- [x] Confirm no secret values are tracked by Git or included in source files (verified: redacted pattern scan passed across 114 tracked text files; no known credential patterns found; `.env` is no longer tracked).
+- [x] Run `npm run build` and confirm zero TypeScript or routing compilation errors (verified: Next.js production build, TypeScript, and App Router compilation passed).
+- [x] Run `npm run dev` and confirm the app renders at `http://localhost:3000` (verified: root route returned HTTP 200 and the title/content rendered).
+- [x] Check the browser console and confirm there are no startup errors (verified: no error entries; only React DevTools info and Next.js HMR connected messages).
 
 ## Module 2: Database Schema & ORM Provisioning (Drizzle/PostgreSQL)
 
