@@ -19,7 +19,7 @@
 - [x] Add `.env.example` containing variable names and placeholder values only (verified: all 12 target variable names from the PRD are present with unmistakable placeholders; no local environment-file contents were accessed).
 - [x] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs (verified: redacted pattern scan passed across 11 tracked artifact files; no tracked screenshots or logs were present; local environment-file contents were not scanned or read).
 - [x] Inspect tracked environment files locally without printing their values (verified: the only tracked environment file is `.env`; inspected variable names only—`SUPABASE_PROJECT_ID`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, and their `VITE_` counterparts—and emitted no values. These names indicate legacy public Supabase configuration; no private credential was confirmed by this inspection).
-- [ ] Remove local environment files from Git tracking where appropriate.
+- [x] Remove local environment files from Git tracking where appropriate (verified: removed `.env` from the Git index but preserved the local file; `.env` is now ignored, and `.env.example` remains tracked).
 - [ ] Rotate any actual secret discovered in Git history or an exposed environment file.
 
 ### Environment variable names
