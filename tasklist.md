@@ -18,7 +18,7 @@
 - [x] Add or verify `.env.local` in `.gitignore` (verified: `git check-ignore -v --no-index .env.local` matches `.gitignore:19` pattern `*.local`; `.env.local` is not tracked and no file contents were read).
 - [x] Add `.env.example` containing variable names and placeholder values only (verified: all 12 target variable names from the PRD are present with unmistakable placeholders; no local environment-file contents were accessed).
 - [x] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs (verified: redacted pattern scan passed across 11 tracked artifact files; no tracked screenshots or logs were present; local environment-file contents were not scanned or read).
-- [ ] Inspect tracked environment files locally without printing their values.
+- [x] Inspect tracked environment files locally without printing their values (verified: the only tracked environment file is `.env`; inspected variable names only—`SUPABASE_PROJECT_ID`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, and their `VITE_` counterparts—and emitted no values. These names indicate legacy public Supabase configuration; no private credential was confirmed by this inspection).
 - [ ] Remove local environment files from Git tracking where appropriate.
 - [ ] Rotate any actual secret discovered in Git history or an exposed environment file.
 
