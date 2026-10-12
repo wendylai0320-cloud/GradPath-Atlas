@@ -17,7 +17,7 @@
 - [x] Confirm the application starts with `npm run dev` on port `3000` (verified: server logged ready, `GET /` returned HTTP 200, and the GradPath Atlas title rendered).
 - [x] Add or verify `.env.local` in `.gitignore` (verified: `git check-ignore -v --no-index .env.local` matches `.gitignore:19` pattern `*.local`; `.env.local` is not tracked and no file contents were read).
 - [x] Add `.env.example` containing variable names and placeholder values only (verified: all 12 target variable names from the PRD are present with unmistakable placeholders; no local environment-file contents were accessed).
-- [ ] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs.
+- [x] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs (verified: redacted pattern scan passed across 11 tracked artifact files; no tracked screenshots or logs were present; local environment-file contents were not scanned or read).
 - [ ] Inspect tracked environment files locally without printing their values.
 - [ ] Remove local environment files from Git tracking where appropriate.
 - [ ] Rotate any actual secret discovered in Git history or an exposed environment file.
