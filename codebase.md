@@ -10253,7 +10253,7 @@ CREATE POLICY "Own document files delete" ON storage.objects FOR DELETE TO authe
 
 ### Repository and runtime
 - [x] Confirm the working repository is `wendylai0320-cloud/GradPath-Atlas` (verified: Git origin and GitHub repository name match).
-- [ ] Create a migration branch for the Next.js and Neon implementation.
+- [x] Create a migration branch for the Next.js and Neon implementation (verified: active branch is `migration/nextjs-neon`).
 - [ ] Confirm the supported Node.js version and record it in `.nvmrc` or the project’s runtime configuration.
 - [ ] Confirm the package manager and lockfile strategy.
 - [ ] Scaffold or migrate the application to Next.js App Router.
