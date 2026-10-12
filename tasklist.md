@@ -16,7 +16,7 @@
 - [x] Scaffold or migrate the application to Next.js App Router (verified: npm dependencies installed and `npm run build` passed, including TypeScript and `/` route compilation).
 - [x] Confirm the application starts with `npm run dev` on port `3000` (verified: server logged ready, `GET /` returned HTTP 200, and the GradPath Atlas title rendered).
 - [x] Add or verify `.env.local` in `.gitignore` (verified: `git check-ignore -v --no-index .env.local` matches `.gitignore:19` pattern `*.local`; `.env.local` is not tracked and no file contents were read).
-- [ ] Add `.env.example` containing variable names and placeholder values only.
+- [x] Add `.env.example` containing variable names and placeholder values only (verified: all 12 target variable names from the PRD are present with unmistakable placeholders; no local environment-file contents were accessed).
 - [ ] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs.
 - [ ] Inspect tracked environment files locally without printing their values.
 - [ ] Remove local environment files from Git tracking where appropriate.
