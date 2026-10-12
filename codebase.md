@@ -165,8 +165,8 @@ export default eslintConfig;
 ```ts
 /// <reference types="next" />
 /// <reference types="next/image-types/global" />
-import "./.next/types/routes.d.ts";
-import "./.next/types/root-params.d.ts";
+import "./.next/dev/types/routes.d.ts";
+import "./.next/dev/types/root-params.d.ts";
 
 // NOTE: This file should not be edited
 // see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
@@ -10276,7 +10276,7 @@ CREATE POLICY "Own document files delete" ON storage.objects FOR DELETE TO authe
 - [x] Confirm the supported Node.js version and record it in `.nvmrc` or the project’s runtime configuration (verified: `.nvmrc` pins Node.js `24.21.0`, an LTS release compatible with the documented Next.js minimum).
 - [x] Confirm the package manager and lockfile strategy (decision: use npm for the target Next.js migration, with `package-lock.json` as its canonical lockfile to match the required `npm run` and `npx` verification commands. The existing `bun.lock` and `bunfig.toml` belong to the prototype and remain untouched until the scaffold/migration replaces its package manifest; do not treat both lockfiles as canonical for the target app).
 - [x] Scaffold or migrate the application to Next.js App Router (verified: npm dependencies installed and `npm run build` passed, including TypeScript and `/` route compilation).
-- [ ] Confirm the application starts with `npm run dev` on port `3000`.
+- [x] Confirm the application starts with `npm run dev` on port `3000` (verified: server logged ready, `GET /` returned HTTP 200, and the GradPath Atlas title rendered).
 - [ ] Add or verify `.env.local` in `.gitignore`.
 - [ ] Add `.env.example` containing variable names and placeholder values only.
 - [ ] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs.
