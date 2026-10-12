@@ -10262,7 +10262,7 @@ CREATE POLICY "Own document files delete" ON storage.objects FOR DELETE TO authe
 - [x] Confirm the working repository is `wendylai0320-cloud/GradPath-Atlas` (verified: Git origin and GitHub repository name match).
 - [x] Create a migration branch for the Next.js and Neon implementation (verified: active branch is `migration/nextjs-neon`).
 - [x] Confirm the supported Node.js version and record it in `.nvmrc` or the project’s runtime configuration (verified: `.nvmrc` pins Node.js `24.21.0`, an LTS release compatible with the documented Next.js minimum).
-- [ ] Confirm the package manager and lockfile strategy.
+- [x] Confirm the package manager and lockfile strategy (decision: use npm for the target Next.js migration, with `package-lock.json` as its canonical lockfile to match the required `npm run` and `npx` verification commands. The existing `bun.lock` and `bunfig.toml` belong to the prototype and remain untouched until the scaffold/migration replaces its package manifest; do not treat both lockfiles as canonical for the target app).
 - [ ] Scaffold or migrate the application to Next.js App Router.
 - [ ] Confirm the application starts with `npm run dev` on port `3000`.
 - [ ] Add or verify `.env.local` in `.gitignore`.
