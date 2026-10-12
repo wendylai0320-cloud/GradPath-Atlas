@@ -10278,7 +10278,7 @@ CREATE POLICY "Own document files delete" ON storage.objects FOR DELETE TO authe
 - [x] Confirm the package manager and lockfile strategy (decision: use npm for the target Next.js migration, with `package-lock.json` as its canonical lockfile to match the required `npm run` and `npx` verification commands. The existing `bun.lock` and `bunfig.toml` belong to the prototype and remain untouched until the scaffold/migration replaces its package manifest; do not treat both lockfiles as canonical for the target app).
 - [x] Scaffold or migrate the application to Next.js App Router (verified: npm dependencies installed and `npm run build` passed, including TypeScript and `/` route compilation).
 - [x] Confirm the application starts with `npm run dev` on port `3000` (verified: server logged ready, `GET /` returned HTTP 200, and the GradPath Atlas title rendered).
-- [ ] Add or verify `.env.local` in `.gitignore`.
+- [x] Add or verify `.env.local` in `.gitignore` (verified: `git check-ignore -v --no-index .env.local` matches `.gitignore:19` pattern `*.local`; `.env.local` is not tracked and no file contents were read).
 - [ ] Add `.env.example` containing variable names and placeholder values only.
 - [ ] Do not copy secret values into `.env.example`, Markdown, tests, screenshots, or logs.
 - [ ] Inspect tracked environment files locally without printing their values.
