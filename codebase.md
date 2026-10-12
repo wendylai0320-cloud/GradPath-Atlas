@@ -12,6 +12,7 @@ lerna-debug.log*
 
 node_modules
 .next/
+next-env.d.ts
 dist
 dist-ssr
 .output
