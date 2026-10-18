@@ -1,6 +1,8 @@
 # Team Pilot Outcomes
 
-> **Current status:** Frontend and additive migration source are prepared on a feature branch. Local build, TypeScript, targeted lint, and automated tests pass. SQL syntax was parsed, but the migration has not been run against PostgreSQL, authorized, or deployed. Keep the outcomes below unchecked until database-level and production acceptance is demonstrated.
+> **Deployment status (19 October 2026):** PR #3 is merged to `main` at `67b1f67f2eabe0d92164e119163222dc51bd7d46`. The additive migration has been applied to the intended Lovable Cloud database after approval. Read-only checks confirmed the five team tables have RLS, no direct client table grants, authenticated-only execution for the 16 team RPCs, and no client access to four private helper functions. Vercel checks succeeded and `/teams` and `/team-join` return HTTP 200. These are deployment/metadata checks, not proof that the invitation and consent journeys work end-to-end.
+>
+> **Acceptance rule:** Keep user-journey outcomes unchecked until tested with separate, email-confirmed adviser and student accounts. No production invitation or consent records were created during deployment verification.
 
 ## Organization workspaces and staff membership
 - [ ] An authenticated, email-confirmed user can create an Adviser or University workspace; the creator becomes its owner.
@@ -28,6 +30,8 @@
 - [ ] No browser-supplied amount, price, currency entitlement, payment status, or invoice status can grant paid access; real invoicing remains disabled until commercial terms and a provider are configured.
 
 ## Database authorization and delivery
-- [ ] New tables have least-privilege grants and RLS; authenticated clients cannot directly read invitation token hashes or write memberships/consents outside validated database functions.
-- [ ] Cross-organization, wrong-email, replay, expiry, pending-consent, revoked-consent, email-confirmation, and read-only cases are covered by database-level authorization checks.
-- [ ] The reviewed migration is applied to the correct Supabase project only after approval and before the feature is described as operational; repository merge alone is not treated as a database deployment.
+- [x] The reviewed additive migration is applied to the correct Lovable Cloud project only after approval.
+- [x] Read-only metadata confirms RLS on all five team tables, no direct client table grants, authenticated-only execution for the team RPCs, and no client access to private helper functions.
+- [ ] Cross-organization, wrong-email, replay, expiry, pending-consent, revoked-consent, email-confirmation, and read-only cases are covered by functional/database authorization tests.
+- [ ] Test and document the exact Vercel password-reset flow using a new email requested after the Lovable Auth allowlist was updated on 19 October 2026.
+- [ ] The team pilot is described as operational only after the user-journey and negative authorization tests above pass; repository merge, route HTTP 200, and metadata checks alone are not sufficient.

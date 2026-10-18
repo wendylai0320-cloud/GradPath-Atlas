@@ -1,12 +1,13 @@
-# GradPath Atlas — Phase 1 Task List
+# GradPath Atlas — Target-Stack Migration Plan (Phase 1 + Phase 2 Backlog)
 
-**Execution plan:** Sequential, Phase 1 only
+**Purpose:** Future re-platforming checklist for the assignment-mandated stack, not the current production release checklist. See [`TASK_LIST.md`](TASK_LIST.md) for current release status.
+**Execution plan:** Sequential Phase 1 migration modules, with a separate Phase 2 backlog at the end.
 **Source:** `PRD.md` and `@codebase.md`
 **Architecture assumption:** The assignment mandates Next.js App Router, TypeScript, Tailwind CSS, Drizzle ORM, Neon PostgreSQL, Clerk Auth, Stripe Checkout, ImageKit, and Gemini API. The current prototype uses TanStack Start and Supabase. This plan assumes the required-stack migration is approved; do not treat the prototype stack as the target.
 
-**Current prototype snapshot (18 October 2026):** The public app is hosted at `https://grad-path-atlas.vercel.app/`. Its homepage presents the programme-planning value proposition, demo comparison, feature summaries, workflow, and admissions disclaimer. The Vercel auth UI offers email/password only; Google sign-in was removed after its Vercel OAuth route returned 404. The public homepage and signup page were spot-checked, but end-to-end production readiness has not been established.
+**Current prototype snapshot (19 October 2026):** The public app is hosted at `https://grad-path-atlas.vercel.app/`. The Vercel auth UI offers email/password only; Google sign-in was removed after its OAuth route returned 404. The limited Adviser/University team pilot is deployed: PR #3 is merged, its additive Lovable Cloud migration is applied, and read-only metadata checks confirm table RLS and restricted RPC access. `/teams`, `/team-join`, and `/reset-password` return HTTP 200. The exact Vercel reset callback is now allowlisted; its full flow requires a fresh-email test. Team invitations, consent/revocation, and negative authorization cases also remain unverified end-to-end.
 
-> Complete modules in order. Do not start the next module until the current module’s verification gate passes. Run database commands only against a development database. Never print or commit secret values.
+> **Target-stack execution guard:** Complete modules in order and pass each verification gate before proceeding. Run target-stack database commands only against a development database. This future migration plan is not a runbook for the deployed Lovable Cloud team-pilot migration. Never print or commit secret values.
 
 ## Module 1: Environment & Secret Key Setup (.env.local)
 
@@ -284,10 +285,10 @@
 
 ## Deferred — Phase 2 Only
 
-Do not implement these items as part of Phase 1 unless scope is explicitly re-approved.
+The limited team pilot is already deployed on the current TanStack/Supabase prototype. These broader expansions remain deferred unless their scope is explicitly re-approved.
 
 - [ ] Add adviser comment threads and two-way collaboration.
-- [ ] Add multi-tenant adviser teams and team seats.
+- [ ] Expand the limited pilot into full multi-tenant adviser teams, seat/role administration, and student portfolios; preserve explicit student consent, read-only review, revocation, and no file access.
 - [ ] Add university cohort dashboards and university licence administration.
 - [ ] Add usage-credit analytics and team usage reporting.
 - [ ] Add automated email or push deadline reminders.

@@ -1,21 +1,21 @@
 # GradPath Atlas — Product Requirements Document
 
-**Status:** Vercel-hosted prototype; assignment target architecture and production readiness remain subject to the decisions below
-**Version:** 2.1
-**Date:** 18 October 2026
+**Status:** Vercel-hosted prototype with the limited Adviser/University team pilot deployed; full end-to-end acceptance and the assignment target-architecture decision remain pending
+**Version:** 2.2
+**Date:** 19 October 2026
 **Codebase context:** `@codebase.md`, generated in this repository with `npx ai-digest`
 
 ## 0. Codebase Digest and Evidence Boundary
 
-The digest was generated from the exact repository `wendylai0320-cloud/GradPath-Atlas`. It contains the project source and configuration (110 files included by `ai-digest`), including the TanStack routes, Supabase migrations, tests, design tokens, and product components. The digest is a source snapshot, not proof that every feature is production-ready. It excludes `.env` under the tool's default ignore rules.
+The digest was generated from the exact repository `wendylai0320-cloud/GradPath-Atlas`. It contains the project source and configuration (110 files included by `ai-digest`), including the TanStack routes, Supabase migrations, tests, design tokens, and product components. It is a source snapshot, may predate later commits, and is not proof that every feature is production-ready. Current deployment status below is based on direct repository and deployment checks; those checks do not replace end-to-end acceptance. The digest excludes `.env` under the tool's default ignore rules.
 
 ### Observed implementation
 
-The current repository is a **TanStack Start v1 / React 19 / Vite 8** app using TypeScript, Tailwind CSS v4, TanStack Router and React Query, Supabase Auth/PostgreSQL/Row-Level Security/private Storage, and a Lovable Cloud auth dependency. Its routes and source implement a public landing page and pricing page; email/password authentication and password reset; an authenticated dashboard; programme comparison and programme detail; tasks; deadlines with calendar/timeline and `.ics` export; document vault and application-document links; strategy summary; adviser view; settings; CSV exports; demo catalogue; and test-only plan switching. The Google sign-in button and handler have been removed from the Vercel auth page; this documents the UI change and does not claim that the backend Google provider was disabled. A Supabase migration defines UUID-backed entities and RLS policies. The codebase includes routing tests and a `npm run build`, `npm run lint`, and `npm test` script.
+The current repository is a **TanStack Start v1 / React 19 / Vite 8** app using TypeScript, Tailwind CSS v4, TanStack Router and React Query, Supabase Auth/PostgreSQL/Row-Level Security/private Storage, and a Lovable Cloud auth dependency. Its routes and source implement a public landing and pricing page; email/password authentication and password reset; an authenticated student workspace; programme comparison/detail; tasks and deadlines; private document storage; strategy summary; adviser view; settings; CSV exports; a demo catalogue; and test-only plan switching. The merged team pilot adds `/teams` and `/team-join`, one-use email-bound invitations, explicit and revocable student consent, and read-only review of whitelisted planning data without document access. The team billing/invoice path is demo-only; no charge or official invoice is created. The Google sign-in button and handler have been removed from the Vercel auth page; this does not claim the backend Google provider was disabled. The repository includes routing tests and `npm run build`, `npm run lint`, and `npm test` scripts.
 
-### Production spot check (18 October 2026)
+### Production spot check (19 October 2026)
 
-The public Vercel deployment at `https://grad-path-atlas.vercel.app/` was checked on 18 October 2026. Its homepage presents the planning value proposition, pricing/sign-in/start-planning navigation, a fictional demo-programme comparison, four feature summaries (compare, track deadlines, reuse documents, share with an adviser), a four-step workflow, and an admissions-outcome disclaimer. The public `/auth?mode=signup` page presents name, email, and password fields; Google sign-in is no longer offered in the Vercel UI. This was a page-level spot check only, not a full end-to-end, security, accessibility, or uptime audit. Mark payment fulfillment, production data accuracy, WCAG conformance, and privacy operations as unverified unless separately tested.
+The public Vercel deployment at `https://grad-path-atlas.vercel.app/` was checked on 18–19 October 2026. The homepage and email/password signup route were spot-checked; Google sign-in is not offered in the Vercel UI. PR #3 was merged at `67b1f67f2eabe0d92164e119163222dc51bd7d46`; Vercel checks succeeded, and safe GET requests to `/teams`, `/team-join`, and `/reset-password` returned HTTP 200. The additive team migration was applied to the intended Lovable Cloud project after approval; read-only metadata checks confirmed RLS on the five team tables, no direct client table grants, authenticated-only execution for the team RPCs, and no client access to private helper functions. On 19 October the exact redirect `https://grad-path-atlas.vercel.app/reset-password` was added to the Lovable Auth allowlist and saved. A fresh reset-email flow and the complete team invitation/consent/revocation journeys have not yet been tested end-to-end. These are deployment and metadata checks only, not a full security, accessibility, uptime, or production-readiness audit. Payment fulfillment, data accuracy, WCAG conformance, and privacy operations remain unverified unless separately tested.
 
 ### Architecture decision — required before implementation planning
 
@@ -48,7 +48,7 @@ GradPath Atlas is an organizational and planning product. It does not predict ad
 ### Revenue model
 
 - **Applicant:** One-off application-season pass. It unlocks the paid features specified for one application season; the season duration, price, currency, tax treatment, and refund policy must be configured and approved before launch.
-- **Advisers and universities:** Licences for adviser/university use. Phase 1 may describe the offer and capture an inquiry or contact request; multi-tenant accounts, seat provisioning, institution administration, and invoice workflows are deferred to Phase 2 unless explicitly selected for launch.
+- **Advisers and universities:** The prototype includes a limited safe team pilot with read-only student review, explicit student consent, revocation, and email-bound invitations. Team billing is demo-only: no payment is charged and no official invoice is issued. Commercial licensing, full seat administration, and institutional billing require separate approval and remain future scope.
 - The current prototype pricing page offers plan cards with currency selection, while plan switching is explicitly a test flow and takes no payment. Existing displayed prices are prototype data, not approved commercial terms.
 
 ### Success measures
@@ -67,20 +67,20 @@ The launch must provide the smallest reliable end-to-end application-planning se
 4. Editable programme/application records, including institution, programme, location, degree/subject, tuition and currency, key requirements, official source URL, and source-verification date where available.
 5. Deadline timeline/calendar and user-managed task checklist with reliable date handling.
 6. Document metadata and secure private document storage, with document type/status and links to one or more applications. File type, size, access, retention, and deletion must be enforced.
-7. Basic adviser sharing only if it is already included in the accepted launch scope: the student explicitly authorizes a named adviser; the adviser receives least-privilege, read-only access and can revoke it. Two-way comment threads remain deferred.
+7. A limited Adviser/University team pilot: workspace owners/admins can invite staff and request student access through one-use, email-bound invitations; the student must affirmatively consent and can revoke access. Staff review is read-only and limited to whitelisted planning data; documents and private notes are excluded. This pilot is deployed, but its complete user journeys still require end-to-end acceptance. Two-way comments and broader seat administration remain deferred.
 8. One-off application-season pass payment through Stripe Checkout, if the paid pass is sold at launch. Create Checkout Sessions server-side and grant paid entitlement only from verified, idempotently processed Stripe webhooks. If checkout is not ready, clearly keep the product in test/no-payment mode and do not imply a completed purchase.
 9. Applicant data export and account/data deletion request path.
 10. Responsive accessible UI, error/empty/loading states, server-side validation and authorization, RLS, automated tests, build/lint/type checks, backups, and basic operational monitoring.
 
-**Prototype features evidenced in the repository:** landing/pricing, auth, programme comparison and detail, catalogue-backed/custom programme entry, deadline timeline/calendar and `.ics` export, document vault, tasks, strategy summary, adviser view, settings, CSV export, and test-mode plan switching. Their presence in code is not a substitute for release QA or a real payment integration.
+**Prototype features evidenced in the repository:** landing/pricing, auth and password reset, programme comparison/detail, catalogue-backed/custom programme entry, deadline timeline/calendar and `.ics` export, document vault, tasks, strategy summary, adviser view, settings, CSV export, and test-mode plan switching. The team pilot adds `/teams` and `/team-join` plus consent-aware read-only review. Their presence in code is not a substitute for release QA or end-to-end acceptance; no real payment integration is active.
 
-**Phase 1 exclusions:** AI admissions advice or admission prediction, automated email reminders, live foreign-exchange feeds, adviser comment threads, organization/team management, multi-tenant university dashboards, usage-credit analytics, advanced cohort analytics, and complex billing administration.
+**Phase 1 exclusions beyond the limited team pilot:** AI admissions advice or admission prediction, automated email reminders, live foreign-exchange feeds, adviser comment threads, full team seat/role administration, unrestricted multi-tenant university dashboards, usage-credit analytics, advanced cohort analytics, and real invoicing or complex billing administration.
 
 ### Phase 2 — Post-launch expansion
 
 Defer until Phase 1 usage, privacy, and support needs are validated:
 
-- Adviser conversations and threaded comments; organization accounts, multiple team seats, role administration, and multi-tenant student portfolios.
+- Expand the limited team pilot into full organization/seat/role administration and multi-tenant student portfolios; add adviser conversations or threaded comments only after scope, consent, and privacy review.
 - University licensing operations, institutional programme editing/verification, cohort analytics, and invoice/seat administration.
 - Usage-credit analytics, team-level usage reporting, and advanced product analytics.
 - Deadline email/push reminders and calendar synchronization beyond the current export.
@@ -124,6 +124,8 @@ The current prototype route paths below are derived from the TanStack route tree
 | `/tasks` | Authenticated | Application to-do list and due dates |
 | `/summary` | Authenticated | Reach/Target/Safety planning summary; informational only, not an outcome predictor |
 | `/adviser` | Authenticated / explicitly authorized | Student sharing controls or adviser read view, depending on role |
+| `/teams` | Authenticated / active organization member | Limited team workspace, invitations, consent status, and read-only whitelisted student review; no document access |
+| `/team-join` | Public invitation entry; acceptance requires authenticated, confirmed matching email | Review an email-bound invitation and accept staff membership or explicitly consent to student access |
 | `/settings` | Authenticated | Academic profile, GPA scale, intake, currency, privacy and plan status |
 | `/api/stripe/checkout` | Server endpoint | Authenticated, server-validated one-off Checkout Session creation |
 | `/api/webhooks/stripe` | Server endpoint | Signature verification, idempotent payment and entitlement updates |
@@ -138,7 +140,7 @@ In the target Next.js App Router implementation, route files live under `app/` (
 4. Compare the shortlist and mark each application’s status, priority, and Reach/Target/Safety planning tier.
 5. Track application deadlines, tasks, and required documents from the dashboard and detail pages.
 6. Upload and securely link reusable documents where enabled; review readiness indicators.
-7. Optionally share progress with a named adviser under explicit read-only permission.
+7. Optionally join a team through a matching, confirmed-email invitation. Student-data access begins only after explicit consent and can be revoked; staff review is read-only and excludes files/private notes.
 8. Purchase the season pass through Stripe Checkout; access changes only after verified webhook confirmation.
 9. Export data or request account deletion when needed.
 
@@ -203,7 +205,7 @@ Clerk authenticates the request; it does not by itself protect Neon rows. Resolv
 
 Use a restricted application database role that is not superuser, table owner with RLS bypass, or `BYPASSRLS` role. Keep migration/admin credentials separate. Ensure `SET LOCAL` identity is scoped to one transaction when pooled connections are used. Shared catalogue rows may be readable to authenticated users, but writes remain owner/admin controlled. Adviser access must be mediated by a verified relationship and narrowly scoped `SELECT` policy; comment writes, if introduced later, must use a separate permission. Test isolation with two users, an adviser, anonymous access, and missing identity context.
 
-The current Supabase policies use `auth.uid()` and `is_adviser_for()`; they are evidence of existing prototype behavior but are not directly portable to Neon. Re-implement and test their intended semantics during migration.
+The current Supabase policies use `auth.uid()` and `is_adviser_for()`; they are evidence of existing prototype behavior but are not directly portable to Neon. The additive team-pilot migration is applied; read-only metadata checks confirmed RLS and least-privilege RPC/table grants. Functional tests with separate adviser/student accounts are still required. Re-implement and test all intended semantics during migration.
 
 ## 6. Third-Party APIs, Environment Keys, and Payment Boundaries
 
@@ -291,6 +293,7 @@ Obtain qualified privacy/legal review for launch regions, controller/processor r
 - Protect against XSS, injection, CSRF, open redirects, brute force, insecure direct object references, and unsafe file uploads. Use secure cookies, HTTPS, security headers, and rate limits.
 - Verify webhook signatures, use idempotency controls, and keep Stripe secret keys server-only. Do not store card data.
 - Use RLS, least-privilege roles, database constraints, secure backups, dependency scanning, and a reviewed migration/recovery plan.
+- For the deployed team pilot, enforce active organization membership and student consent on each read; expose only whitelisted planning data through RPCs, exclude files/private notes, and ensure revocation blocks later reads. Validate negative cases with separate accounts before calling the feature accepted.
 - Avoid personal data and secrets in telemetry, URLs, and error messages. Log security-relevant events with minimized identifiers and a documented retention period.
 
 ## 8. Acceptance Criteria and Release Gates
@@ -307,6 +310,8 @@ Phase 1 is ready for production only when:
 8. No secret is committed or exposed; production `.env.local` is not tracked; server secrets are managed outside the browser.
 9. Application document access is private and authorized; signed URLs expire; file type/size and deletion behavior are tested.
 10. The stack decision in Section 0 is resolved and the implementation documentation, migrations, and deployment config match the selected architecture.
+11. The team pilot passes separate-account tests for email-bound one-use invitations, expiry/replay/wrong-email rejection, explicit consent, revocation, cross-organization isolation, read-only behavior, and exclusion of files/private notes. Route HTTP 200 and database metadata checks alone do not satisfy this gate.
+12. A password-reset email requested from Vercel redirects to `/reset-password` and successfully updates the password; the exact redirect is configured, but this fresh-email end-to-end test is pending.
 
 ## 9. Open Product and Architecture Decisions
 
