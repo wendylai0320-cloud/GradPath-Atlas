@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TeamJoinRouteImport } from './routes/team-join'
 import { Route as AuthenticatedAdviserRouteImport } from './routes/_authenticated/adviser'
 import { Route as AuthenticatedCompareRouteImport } from './routes/_authenticated/compare'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -22,6 +23,7 @@ import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSummaryRouteImport } from './routes/_authenticated/summary'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedTeamsRouteImport } from './routes/_authenticated/teams'
 import { Route as AuthenticatedProgrammesIdRouteImport } from './routes/_authenticated/programmes.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +48,11 @@ const PricingRoute = PricingRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamJoinRoute = TeamJoinRouteImport.update({
+  id: '/team-join',
+  path: '/team-join',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdviserRoute = AuthenticatedAdviserRouteImport.update({
@@ -88,6 +95,11 @@ const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTeamsRoute = AuthenticatedTeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProgrammesIdRoute =
   AuthenticatedProgrammesIdRouteImport.update({
     id: '/programmes/$id',
@@ -100,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/team-join': typeof TeamJoinRoute
   '/adviser': typeof AuthenticatedAdviserRoute
   '/compare': typeof AuthenticatedCompareRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -108,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/summary': typeof AuthenticatedSummaryRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/teams': typeof AuthenticatedTeamsRoute
   '/programmes/$id': typeof AuthenticatedProgrammesIdRoute
 }
 export interface FileRoutesByTo {
@@ -115,6 +129,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/team-join': typeof TeamJoinRoute
   '/adviser': typeof AuthenticatedAdviserRoute
   '/compare': typeof AuthenticatedCompareRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -123,6 +138,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/summary': typeof AuthenticatedSummaryRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/teams': typeof AuthenticatedTeamsRoute
   '/programmes/$id': typeof AuthenticatedProgrammesIdRoute
 }
 export interface FileRoutesById {
@@ -132,6 +148,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/team-join': typeof TeamJoinRoute
   '/_authenticated/adviser': typeof AuthenticatedAdviserRoute
   '/_authenticated/compare': typeof AuthenticatedCompareRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -140,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/summary': typeof AuthenticatedSummaryRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_authenticated/teams': typeof AuthenticatedTeamsRoute
   '/_authenticated/programmes/$id': typeof AuthenticatedProgrammesIdRoute
 }
 export interface FileRouteTypes {
@@ -149,6 +167,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/reset-password'
+    | '/team-join'
     | '/adviser'
     | '/compare'
     | '/dashboard'
@@ -157,6 +176,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/summary'
     | '/tasks'
+    | '/teams'
     | '/programmes/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -164,6 +184,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/reset-password'
+    | '/team-join'
     | '/adviser'
     | '/compare'
     | '/dashboard'
@@ -172,6 +193,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/summary'
     | '/tasks'
+    | '/teams'
     | '/programmes/$id'
   id:
     | '__root__'
@@ -180,6 +202,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/reset-password'
+    | '/team-join'
     | '/_authenticated/adviser'
     | '/_authenticated/compare'
     | '/_authenticated/dashboard'
@@ -188,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/summary'
     | '/_authenticated/tasks'
+    | '/_authenticated/teams'
     | '/_authenticated/programmes/$id'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +221,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TeamJoinRoute: typeof TeamJoinRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -234,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team-join': {
+      id: '/team-join'
+      path: '/team-join'
+      fullPath: '/team-join'
+      preLoaderRoute: typeof TeamJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/adviser': {
@@ -292,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/teams': {
+      id: '/_authenticated/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof AuthenticatedTeamsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/programmes/$id': {
       id: '/_authenticated/programmes/$id'
       path: '/programmes/$id'
@@ -311,6 +350,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSummaryRoute: typeof AuthenticatedSummaryRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
+  AuthenticatedTeamsRoute: typeof AuthenticatedTeamsRoute
   AuthenticatedProgrammesIdRoute: typeof AuthenticatedProgrammesIdRoute
 }
 
@@ -323,6 +363,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSummaryRoute: AuthenticatedSummaryRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
+  AuthenticatedTeamsRoute: AuthenticatedTeamsRoute,
   AuthenticatedProgrammesIdRoute: AuthenticatedProgrammesIdRoute,
 }
 
@@ -335,6 +376,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TeamJoinRoute: TeamJoinRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

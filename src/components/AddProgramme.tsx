@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button, Field, Input, Select } from "@/components/ui-kit";
 import { type Workspace, money } from "@/lib/atlas";
-import { planOf } from "@/lib/plans";
+import { personalPlanOf } from "@/lib/plans";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { searchPresets, type Preset } from "@/lib/programme-presets";
@@ -23,8 +23,8 @@ export function AddProgramme({ ws, onDone }: { ws: Workspace; onDone: () => void
   const [tab, setTab] = useState<"catalogue" | "custom">("catalogue");
   const [err, setErr] = useState("");
   const profile = useProfile();
-  const plan = planOf(profile.data?.plan);
-  const atLimit = ws.applications.length >= plan.maxProgrammes;
+  const personalPlan = personalPlanOf(profile.data?.plan);
+  const atLimit = ws.applications.length >= personalPlan.maxProgrammes;
   const tracked = new Set(ws.applications.map((a) => a.programme_id));
   const available = ws.programmes.filter((p) => !tracked.has(p.id));
   const [f, setF] = useState({ university: "", country: "", name: "", degree: "MSc", tuition: "", currency: "GBP", english: "", deadline: "" });
@@ -73,7 +73,7 @@ export function AddProgramme({ ws, onDone }: { ws: Workspace; onDone: () => void
         </div>
         {atLimit ? (
           <div className="mt-6 rounded-md bg-secondary p-4 text-sm">
-            The Basic plan tracks up to {plan.maxProgrammes} programmes. <Link to="/settings" className="font-medium underline">Upgrade (test flow)</Link> to add more.
+            The {personalPlan.name} plan tracks up to {personalPlan.maxProgrammes} programmes. <Link to="/settings" className="font-medium underline">Upgrade (test flow)</Link> to add more.
           </div>
         ) : (
           <>

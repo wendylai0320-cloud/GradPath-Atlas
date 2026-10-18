@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/components/AddProgramme";
 import { PLANS, planOf, planPrice } from "@/lib/plans";
 import { Badge, Button, Card, Field, Input, PageHeader, Select } from "@/components/ui-kit";
+import { teamApi, type StudentTeamConsent } from "@/lib/team-api";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -37,6 +38,10 @@ function Settings() {
   const [msg, setMsg] = useState("");
   const [planMsg, setPlanMsg] = useState("");
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+  const [teamConsents, setTeamConsents] = useState<StudentTeamConsent[]>([]);
+  const [consentsUnavailable, setConsentsUnavailable] = useState(false);
+  const [consentBusy, setConsentBusy] = useState(false);
+  const [consentMsg, setConsentMsg] = useState("");
 
   useEffect(() => {
     const d = profile.data as Partial<P> | undefined;
@@ -50,6 +55,21 @@ function Settings() {
       });
   }, [profile.data]);
 
+  useEffect(() => {
+    let cancelled = false;
+    teamApi
+      .listMyConsents()
+      .then((rows) => {
+        if (!cancelled) setTeamConsents(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setConsentsUnavailable(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (!profile.data) return <p className="text-sm text-muted-foreground">Loading…</p>;
   const plan = planOf(profile.data.plan);
 
@@ -61,7 +81,9 @@ function Settings() {
   }
   async function setPlan(id: string) {
     if (id === "licence") {
-      setPlanMsg("Adviser / University team licensing is not available in this prototype yet.");
+      setPlanMsg(
+        "Adviser / University access is managed through a team workspace, not a personal student-plan switch.",
+      );
       return;
     }
     setPendingPlan(id);
@@ -79,7 +101,9 @@ function Settings() {
       setPlanMsg(
         id === "season"
           ? "Season Pass test preview selected. No payment was taken; the preview allows unlimited programme tracking."
-          : "Basic plan selected. It tracks up to 4 programmes.",
+          : id === "licence"
+            ? "Adviser / University team pilot selected. This does not charge you or create a paid licence; team access is managed separately through a workspace and student consent."
+            : "Basic plan selected. It tracks up to 4 programmes.",
       );
     } catch (error) {
       setPlanMsg(
@@ -89,6 +113,29 @@ function Settings() {
       );
     } finally {
       setPendingPlan(null);
+    }
+  }
+
+  async function revokeTeamAccess(accessId: string) {
+    setConsentBusy(true);
+    setConsentMsg("");
+    try {
+      const revoked = await teamApi.revokeMyAccess(accessId);
+      if (!revoked)
+        throw new Error("This access has already been revoked or is no longer available.");
+      const revokedAt = new Date().toISOString();
+      setTeamConsents((current) =>
+        current.map((item) =>
+          item.access_id === accessId ? { ...item, revoked_at: revokedAt } : item,
+        ),
+      );
+      setConsentMsg(
+        "Team access revoked. The team can no longer retrieve your shared planning summary.",
+      );
+    } catch (error) {
+      setConsentMsg(error instanceof Error ? error.message : "Could not revoke team access.");
+    } finally {
+      setConsentBusy(false);
     }
   }
 
@@ -178,7 +225,7 @@ function Settings() {
             {plan.id === "season"
               ? "Season Pass is a test preview: it allows unlimited programme tracking, but does not take payment or start a paid 12-month term."
               : plan.id === "licence"
-                ? "This is a saved preview label only. Team accounts, multi-student access, onboarding, and invoicing are not active; switch to Basic or Season Pass for student features."
+                ? "Adviser / University is an organization workspace, not a student entitlement. This saved label does not grant team access or increase personal programme limits. Create or join a team through Team workspace; student data is shared only after explicit consent."
                 : "Basic is free and tracks up to 4 programmes. Season Pass can be previewed here; no payment is taken."}
           </p>
           {planMsg && (
@@ -186,13 +233,14 @@ function Settings() {
               {planMsg}
             </p>
           )}
-          {plan.id !== "licence" && (
-            <ul className="mb-4 list-inside list-disc space-y-1 text-sm text-muted-foreground">
-              {plan.features.map((feature) => (
-                <li key={feature}>{feature}</li>
-              ))}
-            </ul>
-          )}
+          <ul className="mb-4 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            {plan.features.map((feature) => (
+              <li key={feature}>{feature}</li>
+            ))}
+          </ul>
+          <Link to="/teams" className="mb-4 inline-block text-sm font-medium underline">
+            Open Team workspace
+          </Link>
           <ul className="space-y-2">
             {PLANS.map((p) => (
               <li
@@ -205,10 +253,10 @@ function Settings() {
                 </span>
                 {p.id === plan.id ? (
                   <Badge tone="success">Selected preview</Badge>
-                ) : p.availability === "enquiry-only" ? (
-                  <Button size="sm" variant="outline" disabled>
-                    Coming soon
-                  </Button>
+                ) : p.id === "licence" ? (
+                  <Link to="/teams" className="text-sm font-medium underline">
+                    Open workspace
+                  </Link>
                 ) : (
                   <Button
                     size="sm"
@@ -222,6 +270,70 @@ function Settings() {
               </li>
             ))}
           </ul>
+        </Card>
+
+        <Card className="p-5 lg:col-span-2">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-serif text-lg">Team access to my plan</h2>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                A team can view only the programme selections, application statuses, tasks, and
+                deadlines you explicitly agreed to share. Private notes, document links, and files
+                are excluded. You can revoke access here; this stops future access but cannot recall
+                information already viewed or copied.
+              </p>
+            </div>
+            <Link to="/teams" className="text-sm underline">
+              Team workspace
+            </Link>
+          </div>
+          {consentMsg && (
+            <p role="status" className="mt-3 text-sm text-muted-foreground">
+              {consentMsg}
+            </p>
+          )}
+          {consentsUnavailable ? (
+            <p className="mt-4 rounded-md bg-secondary p-3 text-sm text-muted-foreground">
+              Team access controls are not available yet in the connected database.
+            </p>
+          ) : teamConsents.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              You have not shared a plan with a team.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-border">
+              {teamConsents.map((consent) => (
+                <li
+                  key={consent.access_id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"
+                >
+                  <div>
+                    <p className="font-medium">
+                      {consent.organization_name} <Badge>{consent.organization_kind}</Badge>
+                    </p>
+                    <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
+                      {consent.consent_purpose}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Accepted {new Date(consent.consent_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {consent.revoked_at ? (
+                    <Badge>Revoked</Badge>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      disabled={consentBusy}
+                      onClick={() => void revokeTeamAccess(consent.access_id)}
+                    >
+                      Revoke access
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
       </div>
     </>
