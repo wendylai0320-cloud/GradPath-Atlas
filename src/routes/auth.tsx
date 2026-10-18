@@ -86,22 +86,6 @@ function AuthPage() {
     }
   }
 
-  async function google() {
-    setBusy(true);
-    setMsg(null);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth` },
-      });
-      if (error) throw error;
-    } catch (err) {
-      setMsg({ tone: "error", text: err instanceof Error ? err.message : "Google sign-in failed" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
   const title = mode === "signin" ? "Welcome back" : mode === "signup" ? "Create your workspace" : "Reset your password";
 
   return (
@@ -135,12 +119,6 @@ function AuthPage() {
               {busy ? "Please wait…" : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}
             </Button>
           </form>
-          {mode !== "forgot" && (
-            <>
-              <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
-              <Button variant="outline" className="w-full" onClick={google} disabled={busy}>Continue with Google</Button>
-            </>
-          )}
           <div className="mt-6 space-y-2 text-sm text-muted-foreground">
             {mode === "signin" && (
               <>
