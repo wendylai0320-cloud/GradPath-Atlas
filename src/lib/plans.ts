@@ -43,21 +43,25 @@ export const PLANS = [
     id: "licence",
     name: "Adviser / University",
     tagline: "For careers services and university teams",
-    period: "team licence · enquiry only",
-    availability: "enquiry-only",
+    period: "team pilot · test preview",
+    availability: "test-preview",
     featured: false,
-    maxProgrammes: 999,
+    maxProgrammes: 4,
     prices: { HKD: "HK$60", GBP: "£6", USD: "US$8" } as Record<PlanCurrency, string>,
     features: [
-      "Multi-student review (planned)",
-      "Team onboarding (planned)",
-      "Institution-level tools (planned)",
-      "Invoice billing (planned)",
+      "Adviser or University team workspace",
+      "Invite staff with role-based access",
+      "Multi-student review after student consent",
+      "Demo billing inquiry (no payment or invoice)",
     ],
   },
 ] as const;
 export type PlanId = (typeof PLANS)[number]["id"];
 export const planOf = (id: string | null | undefined) => PLANS.find((p) => p.id === id) ?? PLANS[0];
+export const personalPlanOf = (id: string | null | undefined) => {
+  const plan = planOf(id);
+  return plan.id === "licence" ? PLANS[0] : plan;
+};
 
 /** Display price for a plan in a currency (defaults to HKD). */
 export function planPrice(

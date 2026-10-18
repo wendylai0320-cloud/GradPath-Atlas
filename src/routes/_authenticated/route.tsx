@@ -20,6 +20,7 @@ const NAV = [
   { to: "/documents", label: "Documents" },
   { to: "/summary", label: "Shortlist & plan" },
   { to: "/adviser", label: "Adviser review" },
+  { to: "/teams", label: "Team workspace" },
   { to: "/settings", label: "Settings" },
 ] as const;
 
@@ -29,7 +30,9 @@ function Shell() {
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 print:hidden">
-        <div className="px-2"><Logo /></div>
+        <div className="px-2">
+          <Logo />
+        </div>
         <nav aria-label="Main" className="mt-8 flex flex-1 flex-col gap-0.5">
           {NAV.map((n) => (
             <Link
@@ -43,17 +46,24 @@ function Shell() {
           ))}
         </nav>
         <div className="border-t border-sidebar-border px-2 pt-4 text-xs text-muted-foreground">
-          <p className="truncate" title={user.email ?? ""}>{user.email}</p>
+          <p className="truncate" title={user.email ?? ""}>
+            {user.email}
+          </p>
           <button
             className="mt-2 text-foreground underline"
-            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate({ to: "/" });
+            }}
           >
             Sign out
           </button>
         </div>
       </aside>
       <main className="min-w-0 flex-1 px-10 py-10">
-        <div className="mx-auto max-w-[1400px]"><Outlet /></div>
+        <div className="mx-auto max-w-[1400px]">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

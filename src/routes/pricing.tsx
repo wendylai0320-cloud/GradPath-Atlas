@@ -10,12 +10,13 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Free basic planning, a one-season application pass, and adviser or university licences. Prices shown in HKD, GBP or USD.",
+          "Free student planning, a Season Pass preview, and an Adviser or University team pilot. No checkout or official invoice is active.",
       },
       { property: "og:title", content: "Pricing — GradPath Atlas" },
       {
         property: "og:description",
-        content: "Free planning tier, Season Pass and adviser licences, priced in HKD.",
+        content:
+          "Student planning, Season Pass preview, and consent-based Adviser or University team pilot.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -34,9 +35,9 @@ function Pricing() {
           <div>
             <h1 className="text-4xl">Plans for applicants and advising teams</h1>
             <p className="mt-3 max-w-xl text-muted-foreground">
-              Basic and Season Pass are student plans. Season Pass can be previewed in test mode
-              with no payment. Adviser / University is a team-licence concept and is not available
-              for self-service yet.
+              Basic and Season Pass are student plans. Season Pass is a test preview with no
+              payment. Adviser / University teams can create a workspace, invite colleagues, and
+              review only the student plans that have been explicitly shared with them.
             </p>
           </div>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -68,32 +69,26 @@ function Pricing() {
                 <span className="ml-1 font-sans text-sm text-muted-foreground">{p.period}</span>
               </p>
               <ul className="mt-6 flex-1 space-y-2 text-sm">
-                {p.features.map((f) => (
-                  <li key={f} className="flex gap-2">
+                {p.features.map((feature) => (
+                  <li key={feature} className="flex gap-2">
                     <span aria-hidden className="text-success">
                       ✓
                     </span>
-                    {f}
+                    {feature}
                   </li>
                 ))}
               </ul>
-              {p.availability === "enquiry-only" ? (
-                <button
-                  type="button"
-                  disabled
-                  className="mt-8 cursor-not-allowed rounded-md border border-input px-4 py-2.5 text-center text-sm font-medium text-muted-foreground opacity-70"
-                >
-                  Team licence coming soon
-                </button>
-              ) : (
-                <Link
-                  to="/auth"
-                  search={{ mode: "signup" }}
-                  className={`mt-8 rounded-md px-4 py-2.5 text-center text-sm font-medium ${p.featured ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border border-input hover:bg-secondary"}`}
-                >
-                  {p.id === "free" ? "Create free account" : "Create account to preview"}
-                </Link>
-              )}
+              <Link
+                to="/auth"
+                search={{ mode: "signup" }}
+                className={`mt-8 rounded-md px-4 py-2.5 text-center text-sm font-medium ${p.featured ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border border-input hover:bg-secondary"}`}
+              >
+                {p.id === "free"
+                  ? "Create free account"
+                  : p.id === "licence"
+                    ? "Create team pilot account"
+                    : "Create account to preview"}
+              </Link>
               {p.id === "season" && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   After signing in, choose Season Pass under Settings → Plan. This is a test
@@ -102,16 +97,18 @@ function Pricing() {
               )}
               {p.id === "licence" && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Team accounts, multi-student tools, onboarding, and invoice billing are not active
-                  in this prototype.
+                  Billing inquiries are saved as demo requests only. No payment is charged, no email
+                  is sent, and no official invoice is issued. Displayed team prices are
+                  illustrative.
                 </p>
               )}
             </div>
           ))}
         </div>
         <p className="mt-8 text-sm text-muted-foreground">
-          Displayed prices are illustrative prototype values in {currency}; no checkout, payment, or
-          team licence provisioning is currently available.
+          Displayed prices are illustrative prototype values in {currency}. There is no checkout,
+          payment processing, or official invoice issuance; student team access requires explicit
+          consent.
         </p>
       </main>
     </div>
