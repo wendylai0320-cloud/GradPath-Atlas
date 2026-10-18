@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Logo } from "@/components/Logo";
 import { Button, Field, Input } from "@/components/ui-kit";
 
@@ -87,11 +86,6 @@ function AuthPage() {
     }
   }
 
-  async function google() {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (r.error) setMsg({ tone: "error", text: r.error.message ?? "Google sign-in failed" });
-  }
-
   const title = mode === "signin" ? "Welcome back" : mode === "signup" ? "Create your workspace" : "Reset your password";
 
   return (
@@ -125,12 +119,6 @@ function AuthPage() {
               {busy ? "Please wait…" : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}
             </Button>
           </form>
-          {mode !== "forgot" && (
-            <>
-              <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
-              <Button variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
-            </>
-          )}
           <div className="mt-6 space-y-2 text-sm text-muted-foreground">
             {mode === "signin" && (
               <>
