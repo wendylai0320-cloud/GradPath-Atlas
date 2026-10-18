@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Logo } from "@/components/Logo";
 import { Button, Field, Input } from "@/components/ui-kit";
 
@@ -88,8 +87,19 @@ function AuthPage() {
   }
 
   async function google() {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (r.error) setMsg({ tone: "error", text: r.error.message ?? "Google sign-in failed" });
+    setBusy(true);
+    setMsg(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth` },
+      });
+      if (error) throw error;
+    } catch (err) {
+      setMsg({ tone: "error", text: err instanceof Error ? err.message : "Google sign-in failed" });
+    } finally {
+      setBusy(false);
+    }
   }
 
   const title = mode === "signin" ? "Welcome back" : mode === "signup" ? "Create your workspace" : "Reset your password";
@@ -128,7 +138,7 @@ function AuthPage() {
           {mode !== "forgot" && (
             <>
               <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
-              <Button variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
+              <Button variant="outline" className="w-full" onClick={google} disabled={busy}>Continue with Google</Button>
             </>
           )}
           <div className="mt-6 space-y-2 text-sm text-muted-foreground">
