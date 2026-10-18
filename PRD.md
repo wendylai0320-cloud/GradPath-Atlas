@@ -1,8 +1,8 @@
 # GradPath Atlas — Product Requirements Document
 
-**Status:** Assignment-ready specification; architecture migration decision recorded below
-**Version:** 2.0
-**Date:** 12 October 2026
+**Status:** Vercel-hosted prototype; assignment target architecture and production readiness remain subject to the decisions below
+**Version:** 2.1
+**Date:** 18 October 2026
 **Codebase context:** `@codebase.md`, generated in this repository with `npx ai-digest`
 
 ## 0. Codebase Digest and Evidence Boundary
@@ -11,9 +11,11 @@ The digest was generated from the exact repository `wendylai0320-cloud/GradPath-
 
 ### Observed implementation
 
-The current repository is a **TanStack Start v1 / React 19 / Vite 8** app using TypeScript, Tailwind CSS v4, TanStack Router and React Query, Supabase Auth/PostgreSQL/Row-Level Security/private Storage, and Lovable Cloud OAuth integration. Its routes and source implement a public landing page and pricing page; email/password and Google authentication and password reset; an authenticated dashboard; programme comparison and programme detail; tasks; deadlines with calendar/timeline and `.ics` export; document vault and application-document links; strategy summary; adviser view; settings; CSV exports; demo catalogue; and test-only plan switching. A Supabase migration defines UUID-backed entities and RLS policies. The codebase includes routing tests and a `npm run build`, `npm run lint`, and `npm test` script.
+The current repository is a **TanStack Start v1 / React 19 / Vite 8** app using TypeScript, Tailwind CSS v4, TanStack Router and React Query, Supabase Auth/PostgreSQL/Row-Level Security/private Storage, and a Lovable Cloud auth dependency. Its routes and source implement a public landing page and pricing page; email/password authentication and password reset; an authenticated dashboard; programme comparison and programme detail; tasks; deadlines with calendar/timeline and `.ics` export; document vault and application-document links; strategy summary; adviser view; settings; CSV exports; demo catalogue; and test-only plan switching. The Google sign-in button and handler have been removed from the Vercel auth page; this documents the UI change and does not claim that the backend Google provider was disabled. A Supabase migration defines UUID-backed entities and RLS policies. The codebase includes routing tests and a `npm run build`, `npm run lint`, and `npm test` script.
 
-These observations are based on source files and migrations, not a fresh production deployment audit. Mark a feature as “implemented in prototype” only where there is corresponding source/migration evidence; mark payment fulfillment, production data accuracy, WCAG conformance, and privacy operations as unverified unless separately tested.
+### Production spot check (18 October 2026)
+
+The public Vercel deployment at `https://grad-path-atlas.vercel.app/` was checked on 18 October 2026. Its homepage presents the planning value proposition, pricing/sign-in/start-planning navigation, a fictional demo-programme comparison, four feature summaries (compare, track deadlines, reuse documents, share with an adviser), a four-step workflow, and an admissions-outcome disclaimer. The public `/auth?mode=signup` page presents name, email, and password fields; Google sign-in is no longer offered in the Vercel UI. This was a page-level spot check only, not a full end-to-end, security, accessibility, or uptime audit. Mark payment fulfillment, production data accuracy, WCAG conformance, and privacy operations as unverified unless separately tested.
 
 ### Architecture decision — required before implementation planning
 
@@ -102,7 +104,7 @@ Defer until Phase 1 usage, privacy, and support needs are validated:
 
 ### Current prototype architecture (digest evidence)
 
-The checked-in implementation instead uses TanStack Start/Router, React 19, Vite, TanStack Query, Supabase JS/Auth/PostgreSQL/RLS/Storage, and Lovable OAuth. Tailwind v4 and custom components provide the visual system. This current architecture is the source of truth for existing implementation; the preceding target list is the requested future stack. Migration mapping must be planned after the architecture decision in Section 0.
+The checked-in implementation instead uses TanStack Start/Router, React 19, Vite, TanStack Query, Supabase JS/Auth/PostgreSQL/RLS/Storage, and includes a Lovable Cloud auth dependency. The Vercel auth page currently exposes email/password authentication only; Google sign-in was removed from the UI because its OAuth handoff returned a 404 on Vercel. Tailwind v4 and custom components provide the visual system. This current architecture is the source of truth for existing implementation; the preceding target list is the requested future stack. Migration mapping must be planned after the architecture decision in Section 0.
 
 ### Route and page layout
 
@@ -110,9 +112,9 @@ The current prototype route paths below are derived from the TanStack route tree
 
 | Route | Access | Purpose and key UI |
 | --- | --- | --- |
-| `/` | Public | Hero, value proposition, fictional programme preview, feature summary, workflow steps, signup/pricing CTAs, and admissions disclaimer |
+| `/` | Public | Hero and planning value proposition, fictional programme-comparison preview, four feature summaries, four-step workflow, signup/pricing CTAs, and admissions disclaimer |
 | `/pricing` | Public | Plan comparison, currency selector, price/feature summary, pass CTA, and clear note if checkout remains test-only |
-| `/auth?mode=signup` | Public | Email/password and Google sign-in/sign-up, duplicate-account handling |
+| `/auth?mode=signup` | Public | Name/email/password account creation; email/password sign-in and duplicate-account handling. Google sign-in is not offered in the current Vercel UI. |
 | `/reset-password` | Public | Password reset flow |
 | `/dashboard` | Authenticated | Upcoming deadlines, readiness/progress, outstanding work, add-programme action |
 | `/compare` | Authenticated | Responsive programme comparison matrix, filters/notes, currency display, CSV export |

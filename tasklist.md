@@ -4,6 +4,8 @@
 **Source:** `PRD.md` and `@codebase.md`
 **Architecture assumption:** The assignment mandates Next.js App Router, TypeScript, Tailwind CSS, Drizzle ORM, Neon PostgreSQL, Clerk Auth, Stripe Checkout, ImageKit, and Gemini API. The current prototype uses TanStack Start and Supabase. This plan assumes the required-stack migration is approved; do not treat the prototype stack as the target.
 
+**Current prototype snapshot (18 October 2026):** The public app is hosted at `https://grad-path-atlas.vercel.app/`. Its homepage presents the programme-planning value proposition, demo comparison, feature summaries, workflow, and admissions disclaimer. The Vercel auth UI offers email/password only; Google sign-in was removed after its Vercel OAuth route returned 404. The public homepage and signup page were spot-checked, but end-to-end production readiness has not been established.
+
 > Complete modules in order. Do not start the next module until the current module’s verification gate passes. Run database commands only against a development database. Never print or commit secret values.
 
 ## Module 1: Environment & Secret Key Setup (.env.local)
